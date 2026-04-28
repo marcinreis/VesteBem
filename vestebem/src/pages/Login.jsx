@@ -89,7 +89,7 @@ export default function Login() {
 
           {/* Forgot password */}
           <div className="text-end mb-4">
-            <Link to="/esqueceu-senha" className="login-link-green">
+            <Link to="/RecuSenha" className="login-link-green">
               Esqueceu sua senha?
             </Link>
           </div>
