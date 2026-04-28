@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/Login.css";
 
-const roles = ["Doador", "Beneficiário", "Admin"];
+const roles = ["Doador", "Admin"];
 
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState("Doador");
