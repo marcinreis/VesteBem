@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ambiente
+.env
+.env.local
+.env.production
+package-lock.json

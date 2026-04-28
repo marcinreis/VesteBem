@@ -2,14 +2,21 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/RecuSenha.css";
+import { recuperarSenha } from "../services/authService";
 
 export default function RecuSenha() {
   const [email, setEmail] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({ email });
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await recuperarSenha(email);
+    alert("Instruções enviadas para o seu e-mail!");
+  } catch (err) {
+    alert("E-mail não encontrado.");
+    console.error(err);
+  }
+};
 
   return (
     <div className="recu-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100 px-3">

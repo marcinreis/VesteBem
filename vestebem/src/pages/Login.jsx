@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/Login.css";
+import { login } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 const roles = ["Doador", "Admin"];
 
@@ -9,11 +11,18 @@ export default function Login() {
   const [selectedRole, setSelectedRole] = useState("Doador");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({ role: selectedRole, email, password });
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await login(email, password);
+    navigate("/dashboard"); // redireciona após login
+  } catch (err) {
+    alert("E-mail ou senha incorretos.");
+    console.error(err);
+  }
+};
 
   return (
     <div className="login-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100 px-3">

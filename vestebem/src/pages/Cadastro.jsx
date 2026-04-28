@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/Cadastro.css";
+import { cadastrar } from "../services/authService";
+import { useNavigate } from "react-router-dom";
+
 
 const roles = [
   { id: "doador", label: "Doador", desc: "Quero doar roupas" },
@@ -18,15 +21,33 @@ export default function Cadastro() {
     telefone: "",
     endereco: "",
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({ role: selectedRole, ...form });
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (form.senha !== form.confirmarSenha) {
+    alert("As senhas não coincidem.");
+    return;
+  }
+
+  try {
+    await cadastrar(form.email, form.senha, {
+      nome: form.nome,
+      telefone: form.telefone,
+      endereco: form.endereco,
+      role: selectedRole
+    });
+    navigate("/login");
+  } catch (err) {
+    alert("Erro ao criar conta.");
+    console.error(err);
+  }
+};
 
   return (
     <div className="cadastro-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100 px-3 py-5">
