@@ -21,6 +21,8 @@ export default function Cadastro() {
     telefone: "",
     endereco: "",
   });
+  const [erro, setErro] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,26 +30,29 @@ export default function Cadastro() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    setErro("");
 
-  if (form.senha !== form.confirmarSenha) {
-    alert("As senhas não coincidem.");
-    return;
-  }
+    if (form.senha !== form.confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
 
-  try {
-    await cadastrar(form.email, form.senha, {
-      nome: form.nome,
-      telefone: form.telefone,
-      endereco: form.endereco,
-      role: selectedRole
-    });
-    navigate("/login");
-  } catch (err) {
-    alert("Erro ao criar conta.");
-    console.error(err);
-  }
-};
+    setLoading(true);
+    try {
+      await cadastrar(form.email, form.senha, {
+        nome: form.nome,
+        telefone: form.telefone || undefined,
+        endereco: form.endereco || undefined,
+        perfil: selectedRole,
+      });
+      navigate("/login");
+    } catch (err) {
+      setErro(err.message || "Erro ao criar conta.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="cadastro-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100 px-3 py-5">
@@ -83,6 +88,11 @@ export default function Cadastro() {
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
+          {erro && (
+            <div className="alert alert-danger py-2 mb-3" role="alert">
+              {erro}
+            </div>
+          )}
           <div className="row g-3">
             {/* Nome */}
             <div className="col-12 col-md-6">
@@ -142,7 +152,7 @@ export default function Cadastro() {
                   type="password"
                   name="senha"
                   className="cadastro-input"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="8+ chars, letra, número e símbolo"
                   value={form.senha}
                   onChange={handleChange}
                   required
@@ -216,8 +226,8 @@ export default function Cadastro() {
           </div>
 
           {/* Submit */}
-          <button type="submit" className="cadastro-btn-submit w-100 mt-4 mb-3">
-            Criar conta
+          <button type="submit" className="cadastro-btn-submit w-100 mt-4 mb-3" disabled={loading}>
+            {loading ? "Criando..." : "Criar conta"}
           </button>
         </form>
 
