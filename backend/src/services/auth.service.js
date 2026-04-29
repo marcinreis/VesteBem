@@ -48,14 +48,20 @@ export async function register({ email, senha, nome, telefone, endereco, perfil 
     throw err
   }
 
-  await db.collection('usuarios').doc(user.uid).set({
-    nome,
-    email,
-    telefone: telefone ?? null,
-    endereco: endereco ?? null,
-    perfil,
-    criadoEm: admin.firestore.FieldValue.serverTimestamp(),
-  })
+  try {
+    await db.collection('usuarios').doc(user.uid).set({
+      nome,
+      email,
+      telefone: telefone ?? null,
+      endereco: endereco ?? null,
+      perfil,
+      criadoEm: admin.firestore.FieldValue.serverTimestamp(),
+    })
+  } catch (err) {
+    // Rollback: se falhar gravar perfil, remove a conta do Auth pra nao deixar orfa.
+    await auth.deleteUser(user.uid).catch(() => {})
+    throw err
+  }
 
   return { uid: user.uid, email: user.email, perfil }
 }

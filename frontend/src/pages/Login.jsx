@@ -1,28 +1,37 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/Login.css";
 import { login } from "../services/authService";
-import { useNavigate } from "react-router-dom";
 
 const roles = ["Doador", "Admin"];
 
 export default function Login() {
-  const [selectedRole, setSelectedRole] = useState("Doador");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const location = useLocation();
   const navigate = useNavigate();
 
+  const [selectedRole, setSelectedRole] = useState("Doador");
+  const [email, setEmail] = useState(location.state?.email || "");
+  const [password, setPassword] = useState("");
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState(location.state?.sucessoCadastro || false);
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    await login(email, password);
-    navigate("/dashboard"); // redireciona após login
-  } catch (err) {
-    alert("E-mail ou senha incorretos.");
-    console.error(err);
-  }
-};
+    e.preventDefault();
+    setErro("");
+    setSucesso(false);
+    setLoading(true);
+    try {
+      await login(email, password);
+      navigate("/dashboard");
+    } catch (err) {
+      setErro("E-mail ou senha incorretos.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100 px-3">
@@ -54,6 +63,16 @@ export default function Login() {
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
+          {sucesso && (
+            <div className="alert alert-success py-2 mb-3" role="alert">
+              Conta criada com sucesso! Faça login para continuar.
+            </div>
+          )}
+          {erro && (
+            <div className="alert alert-danger py-2 mb-3" role="alert">
+              {erro}
+            </div>
+          )}
           {/* Email */}
           <div className="mb-3">
             <label className="login-label mb-1">E-mail</label>
@@ -104,8 +123,8 @@ export default function Login() {
           </div>
 
           {/* Submit */}
-          <button type="submit" className="login-btn-submit w-100 mb-3">
-            Entrar
+          <button type="submit" className="login-btn-submit w-100 mb-3" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
 

@@ -46,7 +46,7 @@ export default function Cadastro() {
         endereco: form.endereco || undefined,
         perfil: selectedRole,
       });
-      navigate("/login");
+      navigate("/login", { state: { sucessoCadastro: true, email: form.email } });
     } catch (err) {
       setErro(err.message || "Erro ao criar conta.");
     } finally {
