@@ -1,61 +1,53 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../services/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { listarMinhasDoacoes } from "../services/doacoesService";
 import "../pages_css/Dashboard.css";
 
-const statusLabel = {
-  disponivel: "Disponível",
-  entregue: "Entregue",
-  pendente: "Pendente",
+const STATUS = {
+  DISPONIVEL: "Disponível",
+  ENTREGUE: "Entregue",
+  CANCELADA: "Cancelada",
 };
 
 const statusClass = {
-  disponivel: "badge-disponivel",
-  entregue: "badge-entregue",
-  pendente: "badge-pendente",
+  [STATUS.DISPONIVEL]: "badge-disponivel",
+  [STATUS.ENTREGUE]: "badge-entregue",
+  [STATUS.CANCELADA]: "badge-cancelada",
 };
+
+function formatData(ts) {
+  if (!ts) return "—";
+  if (typeof ts === "string" || typeof ts === "number") {
+    return new Date(ts).toLocaleDateString("pt-BR");
+  }
+  if (ts._seconds) {
+    return new Date(ts._seconds * 1000).toLocaleDateString("pt-BR");
+  }
+  if (typeof ts.toDate === "function") {
+    return ts.toDate().toLocaleDateString("pt-BR");
+  }
+  return "—";
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [doacoes, setDoacoes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
-    const fetchDoacoes = async () => {
-      try {
-        const uid = auth.currentUser?.uid;
-        if (!uid) return;
-
-        const q = query(
-          collection(db, "doacoes"),
-          where("doadorUid", "==", uid),
-          orderBy("criadoEm", "desc")
-        );
-
-        const snap = await getDocs(q);
-        const lista = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setDoacoes(lista);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDoacoes();
+    listarMinhasDoacoes()
+      .then((lista) => setDoacoes(lista))
+      .catch((err) => setErro(err.message || "Erro ao carregar doações."))
+      .finally(() => setLoading(false));
   }, []);
 
   const totalDoacoes = doacoes.length;
-  const totalPecas = doacoes.reduce((acc, d) => acc + (d.quantidade || 1), 0);
-  const totalEntregues = doacoes.filter((d) => d.status === "entregue").length;
-  const recentes = doacoes.slice(0, 4);
+  const totalEntregues = doacoes.filter((d) => d.status === STATUS.ENTREGUE).length;
 
-  const formatData = (timestamp) => {
-    if (!timestamp) return "—";
-    const data = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return data.toLocaleDateString("pt-BR");
-  };
+  const recentes = [...doacoes]
+    .sort((a, b) => (b.criadoEm?._seconds ?? 0) - (a.criadoEm?._seconds ?? 0))
+    .slice(0, 4);
 
   const cards = [
     {
@@ -72,7 +64,7 @@ export default function Dashboard() {
     },
     {
       label: "Peças Doadas",
-      valor: totalPecas,
+      valor: totalDoacoes,
       cor: "#2ec4a5",
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -99,14 +91,13 @@ export default function Dashboard() {
 
   return (
     <div className="dash-wrapper">
-
-      {/* Título */}
       <div className="dash-header">
         <h1 className="dash-title">Dashboard do Doador</h1>
         <p className="dash-subtitle">Acompanhe o impacto das suas doações</p>
       </div>
 
-      {/* Cards de métricas */}
+      {erro && <div className="dash-error">{erro}</div>}
+
       <div className="dash-cards">
         {cards.map((card) => (
           <div className="dash-card" key={card.label}>
@@ -123,7 +114,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Doações Recentes */}
       <div className="dash-recentes">
         <div className="dash-recentes-header">
           <div>
@@ -132,9 +122,9 @@ export default function Dashboard() {
           </div>
           <button
             className="dash-ver-todas"
-            onClick={() => navigate("/minhasdoacoes")}
+            onClick={() => navigate("/doarroupas")}
           >
-            Ver todas →
+            + Nova doação
           </button>
         </div>
 
@@ -154,21 +144,20 @@ export default function Dashboard() {
                     </svg>
                   </div>
                   <div>
-                    <p className="dash-item-nome">{doacao.tipo}</p>
+                    <p className="dash-item-nome">{doacao.tipoPeca}</p>
                     <p className="dash-item-data">
                       📅 {formatData(doacao.criadoEm)}
                     </p>
                   </div>
                 </div>
-                <span className={`dash-badge ${statusClass[doacao.status] ?? "badge-pendente"}`}>
-                  {statusLabel[doacao.status] ?? doacao.status}
+                <span className={`dash-badge ${statusClass[doacao.status] ?? "badge-disponivel"}`}>
+                  {doacao.status}
                 </span>
               </div>
             ))
           )}
         </div>
       </div>
-
     </div>
   );
 }

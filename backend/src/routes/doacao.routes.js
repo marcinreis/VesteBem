@@ -10,9 +10,9 @@ const criarSchema = {
   tipoPeca: { type: 'string', required: true, minLength: 2 },
   tamanho: { type: 'string', required: true },
   conservacao: { type: 'string', required: true },
+  cidade: { type: 'string', required: true, minLength: 2 },
   descricao: { type: 'string' },
   fotoUrl: { type: 'string' },
-  cidade: { type: 'string' },
 }
 
 const editarSchema = {

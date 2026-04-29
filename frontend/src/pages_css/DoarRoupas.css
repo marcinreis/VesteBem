@@ -107,7 +107,8 @@
   margin-bottom: 1.5rem;
 }
 
-/* ── Textarea ─────────────────────────────────────────────── */
+/* ── Input / Textarea ─────────────────────────────────────── */
+.doar-input,
 .doar-textarea {
   width: 100%;
   border: 1.5px solid #e5e7eb;
@@ -115,19 +116,34 @@
   padding: 0.7rem 0.9rem;
   font-size: 0.875rem;
   color: #1a1a1a;
-  resize: vertical;
   outline: none;
   transition: border-color 0.18s ease;
   font-family: inherit;
 }
 
+.doar-textarea {
+  resize: vertical;
+}
+
+.doar-input:focus,
 .doar-textarea:focus {
   border-color: #2ec4a5;
   box-shadow: 0 0 0 3px rgba(46, 196, 165, 0.12);
 }
 
+.doar-input::placeholder,
 .doar-textarea::placeholder {
   color: #b0b7c3;
+}
+
+.doar-error {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.82rem;
+  margin-bottom: 1rem;
 }
 
 /* ── Upload ───────────────────────────────────────────────── */
