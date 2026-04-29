@@ -1,0 +1,210 @@
+/* ── Wrapper ──────────────────────────────────────────────── */
+.dash-wrapper {
+  min-height: calc(100vh);
+  background: #f5f5f0;
+  padding: 2.5rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.dash-header {
+  margin-bottom: 2rem;
+}
+
+.dash-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.25rem;
+}
+
+.dash-subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── Cards de métricas ────────────────────────────────────── */
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.dash-card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dash-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dash-card-label {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.dash-card-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.dash-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Doações Recentes ─────────────────────────────────────── */
+.dash-recentes {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.75rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dash-recentes-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.dash-recentes-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.15rem;
+}
+
+.dash-recentes-desc {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.dash-ver-todas {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 0;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.dash-ver-todas:hover {
+  color: #2ec4a5;
+}
+
+/* ── Lista ────────────────────────────────────────────────── */
+.dash-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dash-empty {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  text-align: center;
+  padding: 2rem 0;
+  margin: 0;
+}
+
+.dash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border: 1px solid #f0f0f0;
+  border-radius: 0.75rem;
+  transition: background 0.15s ease;
+}
+
+.dash-item:hover {
+  background: #fafafa;
+}
+
+.dash-item-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dash-item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.625rem;
+  background: #e6f7f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dash-item-nome {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.15rem;
+}
+
+.dash-item-data {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* ── Badges ───────────────────────────────────────────────── */
+.dash-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.85rem;
+  border-radius: 50rem;
+}
+
+.badge-entregue {
+  background: #e6f7f3;
+  color: #2ec4a5;
+}
+
+.badge-disponivel {
+  background: #e0f2fe;
+  color: #0ea5e9;
+}
+
+.badge-pendente {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+/* ── Responsivo ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .dash-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-wrapper {
+    padding: 1.5rem 1rem;
+  }
+}
