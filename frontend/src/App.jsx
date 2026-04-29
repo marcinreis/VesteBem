@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/Layout";
+import RotaPrivada from "./components/RotaPrivada";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro"
 import RecuSenha from "./pages/RecuSenha";
-import RotaPrivada from "./components/RotaPrivada";
 import Dashboard from "./pages/Dashboard";
+import DoarRoupas from "./pages/DoarRoupas";
 
 function App() {
   return (
@@ -13,11 +15,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/RecuSenha" element={<RecuSenha />} />
-        <Route path="/dashboard" element={
-          <RotaPrivada>
-          <Dashboard />
-          </RotaPrivada>
-        } />
+        <Route element={<RotaPrivada><Layout /></RotaPrivada>}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/doarroupas" element={<DoarRoupas/>}/>
+        </Route>
       </Routes>
     </BrowserRouter>
   );
