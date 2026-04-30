@@ -6,6 +6,7 @@ import Cadastro from "./pages/Cadastro"
 import RecuSenha from "./pages/RecuSenha";
 import Dashboard from "./pages/Dashboard";
 import DoarRoupas from "./pages/DoarRoupas";
+import MinhasDoacoes from "./pages/MinhasDoacoes";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route element={<RotaPrivada><Layout /></RotaPrivada>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/doarroupas" element={<DoarRoupas/>}/>
+          <Route path="/minhas-doacoes"element={<MinhasDoacoes/>}/>
         </Route>
       </Routes>
     </BrowserRouter>
