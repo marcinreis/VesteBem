@@ -158,6 +158,51 @@
   gap: 1rem;
 }
 
+.dash-item-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dash-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dash-btn-editar,
+.dash-btn-cancelar {
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid #e5e7eb;
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dash-btn-editar:hover:not(:disabled) {
+  border-color: #2ec4a5;
+  color: #2ec4a5;
+}
+
+.dash-btn-cancelar {
+  border-color: #fee2e2;
+  color: #ef4444;
+}
+
+.dash-btn-cancelar:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.dash-btn-editar:disabled,
+.dash-btn-cancelar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .dash-item-icon {
   width: 40px;
   height: 40px;
@@ -203,6 +248,24 @@
 .badge-pendente {
   background: #fef3c7;
   color: #d97706;
+}
+
+.badge-cancelada {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ── Erro ─────────────────────────────────────────────────── */
+.dash-error {
+  width: 100%;
+  max-width: 860px;
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 0.625rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
 }
 
 /* ── Responsivo ───────────────────────────────────────────── */
