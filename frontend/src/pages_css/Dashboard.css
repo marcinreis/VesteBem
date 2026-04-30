@@ -1,14 +1,17 @@
 /* ── Wrapper ──────────────────────────────────────────────── */
 .dash-wrapper {
-  min-height: calc(100vh);
+  min-height: calc(100vh - 60px);
   background: #f5f5f0;
-  padding: 2.5rem 2rem;
-  max-width: 1100px;
-  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ── Header ───────────────────────────────────────────────── */
 .dash-header {
+  width: 100%;
+  max-width: 860px;
   margin-bottom: 2rem;
 }
 
@@ -31,6 +34,8 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
   margin-bottom: 1.75rem;
+  width: 100%;
+  max-width: 860px;
 }
 
 .dash-card {
@@ -75,9 +80,11 @@
 /* ── Doações Recentes ─────────────────────────────────────── */
 .dash-recentes {
   background: #fff;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   padding: 1.75rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 860px;
 }
 
 .dash-recentes-header {
@@ -121,9 +128,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  max-height: 480px;
-  overflow-y: auto;
-  padding-right: 0.25rem;
 }
 
 .dash-empty {
@@ -178,55 +182,6 @@
   margin: 0;
 }
 
-/* ── Ações inline ─────────────────────────────────────────── */
-.dash-item-right {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.dash-item-actions {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.dash-btn-editar,
-.dash-btn-cancelar {
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 0.35rem 0.75rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-  background: #fff;
-}
-
-.dash-btn-editar {
-  border: 1px solid #d1d5db;
-  color: #374151;
-}
-
-.dash-btn-editar:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-}
-
-.dash-btn-cancelar {
-  border: 1px solid #fecaca;
-  color: #dc2626;
-}
-
-.dash-btn-cancelar:hover:not(:disabled) {
-  background: #fef2f2;
-  border-color: #f87171;
-}
-
-.dash-btn-editar:disabled,
-.dash-btn-cancelar:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 /* ── Badges ───────────────────────────────────────────────── */
 .dash-badge {
   font-size: 0.75rem;
@@ -245,19 +200,9 @@
   color: #0ea5e9;
 }
 
-.badge-cancelada {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.dash-error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
-  margin-bottom: 1.25rem;
+.badge-pendente {
+  background: #fef3c7;
+  color: #d97706;
 }
 
 /* ── Responsivo ───────────────────────────────────────────── */
@@ -268,20 +213,5 @@
 
   .dash-wrapper {
     padding: 1.5rem 1rem;
-  }
-
-  .dash-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .dash-item-right {
-    justify-content: space-between;
-  }
-
-  .dash-item-actions {
-    flex: 1;
-    justify-content: flex-end;
   }
 }
