@@ -110,7 +110,7 @@ export default function Navbar() {
             {userData?.nome?.split(" ")[0] ?? auth.currentUser?.email?.split("@")[0]}
           </span>
           <span className="navbar-role">
-            {userData?.role === "doador" ? "Doador" : userData?.role === "beneficiario" ? "Beneficiário" : "Admin"}
+            {userData?.role === "beneficiario" ? "Beneficiário" : userData?.role === "admin" ? "Admin" : "Doador"}
           </span>
         </div>
         <button className="navbar-logout" onClick={handleLogout} title="Sair">
