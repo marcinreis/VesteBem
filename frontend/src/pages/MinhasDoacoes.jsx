@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../services/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { editarDoacao, cancelarDoacao } from "../services/doacoesService";
+import { listarMinhasDoacoes, editarDoacao, cancelarDoacao } from "../services/doacoesService";
 import EditarDoacaoModal from "../components/EditarDoacaoModal";
 import "../pages_css/MinhasDoacoes.css";
 
@@ -36,15 +34,8 @@ export default function MinhasDoacoes() {
 
   const fetchDoacoes = async () => {
     try {
-      const uid = auth.currentUser?.uid;
-      if (!uid) return;
-      const q = query(
-        collection(db, "doacoes"),
-        where("doadorUid", "==", uid),
-        orderBy("criadoEm", "desc")
-      );
-      const snap = await getDocs(q);
-      setDoacoes(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      const lista = await listarMinhasDoacoes();
+      setDoacoes(lista);
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,11 +47,19 @@ export default function MinhasDoacoes() {
     fetchDoacoes();
   }, []);
 
-  const formatData = (timestamp) => {
-    if (!timestamp) return "—";
-    const data = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return data.toLocaleDateString("pt-BR");
-  };
+  function formatData(ts) {
+  if (!ts) return "—";
+  if (typeof ts === "string" || typeof ts === "number") {
+    return new Date(ts).toLocaleDateString("pt-BR");
+  }
+  if (ts._seconds) {
+    return new Date(ts._seconds * 1000).toLocaleDateString("pt-BR");
+  }
+  if (typeof ts.toDate === "function") {
+    return ts.toDate().toLocaleDateString("pt-BR");
+  }
+  return "—";
+}
 
   const doacoesFiltradas = doacoes.filter((d) => {
     const statusFiltro = filtroMap[filtroAtivo];
@@ -136,7 +135,7 @@ export default function MinhasDoacoes() {
 
               {/* Conteúdo */}
               <div className="mdb-card-body">
-                <p className="mdb-card-tipo">{doacao.tipoPeca ?? doacao.tipo}</p>
+                <p className="mdb-card-tipo">{doacao.tipoPeca}</p>
                 <p className="mdb-card-detalhe">Tamanho: <strong>{doacao.tamanho}</strong></p>
                 <p className="mdb-card-detalhe">Condição: <strong>{doacao.conservacao}</strong></p>
                 {doacao.descricao && (
