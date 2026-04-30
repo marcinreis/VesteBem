@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { listarMinhasDoacoes } from "../services/doacoesService";
+import { listarMinhasDoacoes, editarDoacao, cancelarDoacao } from "../services/doacoesService";
+import EditarDoacaoModal from "../components/EditarDoacaoModal";
 import "../pages_css/Dashboard.css";
 
 const STATUS = {
@@ -34,6 +35,8 @@ export default function Dashboard() {
   const [doacoes, setDoacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [editandoDoacao, setEditandoDoacao] = useState(null);
+  const [cancelandoId, setCancelandoId] = useState(null);
 
   useEffect(() => {
     listarMinhasDoacoes()
@@ -45,9 +48,30 @@ export default function Dashboard() {
   const totalDoacoes = doacoes.length;
   const totalEntregues = doacoes.filter((d) => d.status === STATUS.ENTREGUE).length;
 
-  const recentes = [...doacoes]
-    .sort((a, b) => (b.criadoEm?._seconds ?? 0) - (a.criadoEm?._seconds ?? 0))
-    .slice(0, 4);
+  const ordenadas = [...doacoes].sort(
+    (a, b) => (b.criadoEm?._seconds ?? 0) - (a.criadoEm?._seconds ?? 0),
+  );
+
+  const handleSalvarEdicao = async (id, dados) => {
+    setErro("");
+    const atualizada = await editarDoacao(id, dados);
+    setDoacoes((prev) => prev.map((d) => (d.id === id ? { ...d, ...atualizada } : d)));
+    setEditandoDoacao(null);
+  };
+
+  const handleCancelar = async (doacao) => {
+    if (!window.confirm(`Cancelar doação "${doacao.tipoPeca}"?`)) return;
+    setErro("");
+    setCancelandoId(doacao.id);
+    try {
+      const atualizada = await cancelarDoacao(doacao.id);
+      setDoacoes((prev) => prev.map((d) => (d.id === doacao.id ? { ...d, ...atualizada } : d)));
+    } catch (err) {
+      setErro(err.message || "Erro ao cancelar doação.");
+    } finally {
+      setCancelandoId(null);
+    }
+  };
 
   const cards = [
     {
@@ -117,8 +141,8 @@ export default function Dashboard() {
       <div className="dash-recentes">
         <div className="dash-recentes-header">
           <div>
-            <p className="dash-recentes-title">Doações Recentes</p>
-            <p className="dash-recentes-desc">Suas últimas contribuições</p>
+            <p className="dash-recentes-title">Minhas Doações</p>
+            <p className="dash-recentes-desc">Gerencie suas contribuições</p>
           </div>
           <button
             className="dash-ver-todas"
@@ -131,33 +155,66 @@ export default function Dashboard() {
         <div className="dash-lista">
           {loading ? (
             <p className="dash-empty">Carregando...</p>
-          ) : recentes.length === 0 ? (
+          ) : ordenadas.length === 0 ? (
             <p className="dash-empty">Nenhuma doação cadastrada ainda.</p>
           ) : (
-            recentes.map((doacao) => (
-              <div className="dash-item" key={doacao.id}>
-                <div className="dash-item-left">
-                  <div className="dash-item-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ec4a5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/>
-                      <path d="M12 22V7"/>
-                    </svg>
+            ordenadas.map((doacao) => {
+              const podeEditar = doacao.status === STATUS.DISPONIVEL;
+              return (
+                <div className="dash-item" key={doacao.id}>
+                  <div className="dash-item-left">
+                    <div className="dash-item-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ec4a5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/>
+                        <path d="M12 22V7"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="dash-item-nome">{doacao.tipoPeca}</p>
+                      <p className="dash-item-data">
+                        📅 {formatData(doacao.criadoEm)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="dash-item-nome">{doacao.tipoPeca}</p>
-                    <p className="dash-item-data">
-                      📅 {formatData(doacao.criadoEm)}
-                    </p>
+                  <div className="dash-item-right">
+                    <span className={`dash-badge ${statusClass[doacao.status] ?? "badge-disponivel"}`}>
+                      {doacao.status}
+                    </span>
+                    {podeEditar && (
+                      <div className="dash-item-actions">
+                        <button
+                          type="button"
+                          className="dash-btn-editar"
+                          onClick={() => setEditandoDoacao(doacao)}
+                          disabled={cancelandoId === doacao.id}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          className="dash-btn-cancelar"
+                          onClick={() => handleCancelar(doacao)}
+                          disabled={cancelandoId === doacao.id}
+                        >
+                          {cancelandoId === doacao.id ? "Cancelando..." : "Cancelar"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <span className={`dash-badge ${statusClass[doacao.status] ?? "badge-disponivel"}`}>
-                  {doacao.status}
-                </span>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
+
+      {editandoDoacao && (
+        <EditarDoacaoModal
+          doacao={editandoDoacao}
+          onSalvar={handleSalvarEdicao}
+          onFechar={() => setEditandoDoacao(null)}
+        />
+      )}
     </div>
   );
 }
