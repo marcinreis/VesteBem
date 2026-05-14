@@ -35,7 +35,6 @@ export default function MinhasDoacoes() {
   const fetchDoacoes = async () => {
     try {
       const lista = await listarMinhasDoacoes();
-      console.log("DOACOES:", lista); 
       setDoacoes(lista);
     } catch (err) {
       console.error(err);
