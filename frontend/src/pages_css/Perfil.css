@@ -1,0 +1,209 @@
+.perfil-wrapper {
+  min-height: calc(100vh - 120px);
+  background: radial-gradient(ellipse at top left, #d4f5e9 0%, #ffffff 45%),
+              radial-gradient(ellipse at bottom right, #fef3d0 0%, #ffffff 50%);
+  background-color: #f9fdfb;
+  padding: 2.5rem 1.25rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.perfil-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.perfil-avatar {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: #2ec4a5;
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.5px;
+}
+
+.perfil-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.3px;
+  margin-bottom: 0.3rem;
+}
+
+.perfil-subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 0;
+}
+
+.perfil-card {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  padding: 2.25rem 2rem;
+  width: 100%;
+  max-width: 660px;
+}
+
+.perfil-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  display: block;
+}
+
+.perfil-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 0.625rem;
+  padding: 0.6rem 0.9rem;
+  background: #fff;
+  transition: border-color 0.18s ease;
+}
+
+.perfil-input-wrapper:focus-within {
+  border-color: #2ec4a5;
+  box-shadow: 0 0 0 3px rgba(46, 196, 165, 0.12);
+}
+
+.perfil-input-wrapper.readonly {
+  background: #f3f4f6;
+}
+
+.perfil-input-icon {
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.perfil-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  background: transparent;
+}
+
+.perfil-input::placeholder {
+  color: #b0b7c3;
+}
+
+.perfil-input:disabled {
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.perfil-badge-perfil {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 50rem;
+  background: #f0fdf8;
+  color: #22a08a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.perfil-btn-submit {
+  background: #2ec4a5;
+  color: #fff;
+  border: none;
+  border-radius: 50rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.12s ease;
+  letter-spacing: 0.3px;
+}
+
+.perfil-btn-submit:hover:not(:disabled) {
+  background: #22a08a;
+}
+
+.perfil-btn-submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.perfil-btn-submit:disabled {
+  background: #9ed7c8;
+  cursor: not-allowed;
+}
+
+.perfil-btn-secondary {
+  background: transparent;
+  color: #6b7280;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 50rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.perfil-btn-secondary:hover:not(:disabled) {
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.perfil-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.perfil-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.perfil-actions .perfil-btn-submit {
+  flex: 1;
+}
+
+.perfil-feedback {
+  font-size: 0.875rem;
+  border-radius: 0.625rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.perfil-feedback.success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.perfil-feedback.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 576px) {
+  .perfil-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .perfil-title {
+    font-size: 1.4rem;
+  }
+
+  .perfil-actions {
+    flex-direction: column-reverse;
+  }
+}
