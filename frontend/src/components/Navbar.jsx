@@ -4,6 +4,7 @@ import { auth, db } from "../services/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { logout } from "../services/authService";
 import "./Navbar.css";
+import logo from "../imagens/logoVesteBem.png";
 
 const navLinks = [
   {
@@ -82,7 +83,6 @@ export default function Navbar() {
     <nav className="navbar-vb">
       {/* Logo */}
       <div className="navbar-logo">
-        <span className="navbar-heart">&#x2665;</span>
         <span className="navbar-brand">VesteBem</span>
       </div>
 

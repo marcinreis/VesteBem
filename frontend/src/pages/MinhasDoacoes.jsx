@@ -182,7 +182,6 @@ export default function MinhasDoacoes() {
         </div>
       )}
 
-      {/* Modal do colega */}
       {doacaoEditando && (
         <EditarDoacaoModal
           doacao={doacaoEditando}

@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/Cadastro.css";
 import { cadastrar } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import logo from "../imagens/logoVesteBem.png"
 
 
 const roles = [
@@ -58,7 +59,7 @@ export default function Cadastro() {
     <div className="cadastro-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100 px-3 py-5">
       {/* Header */}
       <div className="text-center mb-4">
-        <span className="cadastro-heart-icon mb-3 d-block">&#x2665;</span>
+        <img src={logo} alt="VesteBem" className="LogoVesteBem"/>
         <h1 className="cadastro-title">Criar Conta</h1>
         <p className="cadastro-subtitle">Junte-se à nossa comunidade</p>
       </div>

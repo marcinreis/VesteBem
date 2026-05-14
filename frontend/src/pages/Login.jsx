@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/Login.css";
 import { login } from "../services/authService";
+import logo from "../imagens/logoVesteBem.png";
 
 const roles = ["Doador", "Admin"];
 
@@ -37,7 +38,7 @@ export default function Login() {
     <div className="login-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100 px-3">
       {/* Header */}
       <div className="text-center mb-4">
-        <span className="login-heart-icon mb-3 d-block">&#x2665;</span>
+        <img src={logo} alt="VesteBem" className="LogoVesteBem"/>
         <h1 className="login-title">Bem-vindo ao VesteBem</h1>
         <p className="login-subtitle">Faça login para continuar</p>
       </div>
