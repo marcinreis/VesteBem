@@ -20,9 +20,9 @@ const statusClass = {
 
 const filtroMap = {
   "Todas": null,
-  "Disponíveis": "disponivel",
-  "Entregues": "entregue",
-  "Canceladas": "cancelada",
+  "Disponíveis": "Disponível",
+  "Entregues": "Entregue",
+  "Canceladas": "Cancelada",
 };
 
 export default function MinhasDoacoes() {
@@ -35,6 +35,7 @@ export default function MinhasDoacoes() {
   const fetchDoacoes = async () => {
     try {
       const lista = await listarMinhasDoacoes();
+      console.log("DOACOES:", lista); 
       setDoacoes(lista);
     } catch (err) {
       console.error(err);
@@ -190,7 +191,7 @@ export default function MinhasDoacoes() {
           onFechar={() => setDoacaoEditando(null)}
         />
       )}
-
+    
     </div>
   );
 }
