@@ -7,9 +7,11 @@
 }
 
 /* ── Header ───────────────────────────────────────────────── */
-.LogoVesteBem{
-  width: 15%;
-  height: 15%;
+.LogoVesteBem {
+  width: 300px !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
 }
 
 .login-title {
@@ -163,6 +165,10 @@
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 480px) {
+    /* .LogoVesteBem {
+    width: clamp(64px, 20vw, 100px);
+  } */
+  
   .login-card {
     padding: 1.75rem 1.25rem;
   }
