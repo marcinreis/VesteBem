@@ -7,6 +7,7 @@ import RecuSenha from "./pages/RecuSenha";
 import Dashboard from "./pages/Dashboard";
 import DoarRoupas from "./pages/DoarRoupas";
 import MinhasDoacoes from "./pages/MinhasDoacoes";
+import Perfil from "./pages/Perfil";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/doarroupas" element={<DoarRoupas/>}/>
           <Route path="/minhas-doacoes"element={<MinhasDoacoes/>}/>
+          <Route path="/perfil" element={<Perfil />} />
         </Route>
       </Routes>
     </BrowserRouter>
