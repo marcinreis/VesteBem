@@ -12,7 +12,7 @@ const registerSchema = {
   nome: { type: 'string', required: true, minLength: 2 },
   telefone: { type: 'string' },
   endereco: { type: 'string' },
-  perfil: { type: 'enum', required: true, values: ['doador', 'beneficiario', 'ong', 'admin'] },
+  perfil: { type: 'enum', required: true, values: ['doador', 'beneficiario', 'ong'] },
 }
 
 const loginSchema = {

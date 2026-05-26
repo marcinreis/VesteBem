@@ -2,7 +2,8 @@ import { auth, db, admin } from '../config/firebase.js'
 import { HttpError } from '../middlewares/errorHandler.js'
 
 const FIREBASE_REST = 'https://identitytoolkit.googleapis.com/v1'
-const PERFIS_VALIDOS = ['doador', 'beneficiario', 'ong', 'admin']
+// Admin nao pode ser criado pela API publica — use scripts/criar-admin.js.
+const PERFIS_VALIDOS = ['doador', 'beneficiario', 'ong']
 
 function getApiKey() {
   const key = process.env.FIREBASE_WEB_API_KEY
