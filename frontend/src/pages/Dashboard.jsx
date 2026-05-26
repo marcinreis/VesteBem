@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../services/firebase";
 import { listarMinhasDoacoes, editarDoacao, cancelarDoacao } from "../services/doacoesService";
+import { obterMeuPerfil } from "../services/usuariosService";
 import EditarDoacaoModal from "../components/EditarDoacaoModal";
 import "../pages_css/Dashboard.css";
 
@@ -37,13 +40,35 @@ export default function Dashboard() {
   const [erro, setErro] = useState("");
   const [editandoDoacao, setEditandoDoacao] = useState(null);
   const [cancelandoId, setCancelandoId] = useState(null);
+  const [perfil, setPerfil] = useState(undefined);
 
   useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        setPerfil(null);
+        return;
+      }
+      obterMeuPerfil()
+        .then((dados) => setPerfil(dados?.perfil ?? null))
+        .catch(() => setPerfil(null));
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (perfil === undefined || perfil === "admin") return;
     listarMinhasDoacoes()
       .then((lista) => setDoacoes(lista))
       .catch((err) => setErro(err.message || "Erro ao carregar doações."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [perfil]);
+
+  if (perfil === undefined) {
+    return <p style={{ padding: 16 }}>Carregando...</p>;
+  }
+  if (perfil === "admin") {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
 
   const totalDoacoes = doacoes.length;
   const totalEntregues = doacoes.filter((d) => d.status === STATUS.ENTREGUE).length;

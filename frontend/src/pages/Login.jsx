@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../pages_css/Login.css";
 import { login } from "../services/authService";
+import { obterMeuPerfil } from "../services/usuariosService";
 import logo from "../imagens/logoVesteBem.png";
 
 const roles = ["Doador", "Admin"];
@@ -25,13 +26,23 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate("/dashboard");
     } catch (err) {
       setErro("E-mail ou senha incorretos.");
-      console.error(err);
-    } finally {
+      console.error("[login] falha ao autenticar:", err);
       setLoading(false);
+      return;
     }
+
+    let perfil = null;
+    try {
+      const me = await obterMeuPerfil();
+      perfil = me?.perfil ?? null;
+    } catch (err) {
+      console.warn("[login] nao foi possivel obter o perfil, usando rota default:", err);
+    }
+
+    navigate(perfil === "admin" ? "/admin/dashboard" : "/dashboard");
+    setLoading(false);
   };
 
   return (

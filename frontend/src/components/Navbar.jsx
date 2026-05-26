@@ -1,10 +1,18 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { auth, db } from "../services/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../services/firebase";
 import { logout } from "../services/authService";
+import { obterMeuPerfil } from "../services/usuariosService";
 import "./Navbar.css";
 import logo from "../imagens/logoVesteBem.png";
+
+const perfilLabel = {
+  doador: "Doador",
+  beneficiario: "Beneficiário",
+  ong: "ONG",
+  admin: "Admin",
+};
 
 const navLinks = [
   {
@@ -61,17 +69,48 @@ const navLinks = [
   },
 ];
 
+const dashboardIcon = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+    <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+  </svg>
+);
+
+const perfilIcon = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+  </svg>
+);
+
+const relatorioIcon = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 3v18h18"/>
+    <path d="M7 15l4-4 4 4 5-6"/>
+  </svg>
+);
+
+const adminLinks = [
+  { to: "/admin/dashboard", label: "Dashboard", icon: dashboardIcon },
+  { to: "/admin/relatorio", label: "Relatório", icon: relatorioIcon },
+  { to: "/perfil", label: "Perfil", icon: perfilIcon },
+];
+
 export default function Navbar() {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      getDoc(doc(db, "usuarios", user.uid)).then((snap) => {
-        if (snap.exists()) setUserData(snap.data());
-      });
-    }
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        setUserData(null);
+        return;
+      }
+      obterMeuPerfil()
+        .then((dados) => setUserData(dados))
+        .catch((err) => console.warn("[navbar] falha ao obter perfil:", err));
+    });
+    return () => unsub();
   }, []);
 
   const handleLogout = async () => {
@@ -88,7 +127,7 @@ export default function Navbar() {
 
       {/* Links */}
       <ul className="navbar-links">
-        {navLinks.map((link) => (
+        {(userData?.perfil === "admin" ? adminLinks : navLinks).map((link) => (
           <li key={link.to}>
             <NavLink
               to={link.to}
@@ -110,7 +149,7 @@ export default function Navbar() {
             {userData?.nome?.split(" ")[0] ?? auth.currentUser?.email?.split("@")[0]}
           </span>
           <span className="navbar-role">
-            {userData?.role === "beneficiario" ? "Beneficiário" : userData?.role === "admin" ? "Admin" : "Doador"}
+            {perfilLabel[userData?.perfil] ?? "—"}
           </span>
         </div>
         <button className="navbar-logout" onClick={handleLogout} title="Sair">
