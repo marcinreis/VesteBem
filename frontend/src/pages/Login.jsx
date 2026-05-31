@@ -6,13 +6,10 @@ import { login } from "../services/authService";
 import { obterMeuPerfil } from "../services/usuariosService";
 import logo from "../imagens/logoVesteBem.png";
 
-const roles = ["Doador", "Admin"];
-
 export default function Login() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [selectedRole, setSelectedRole] = useState("Doador");
   const [email, setEmail] = useState(location.state?.email || "");
   const [password, setPassword] = useState("");
   const [erro, setErro] = useState("");
@@ -41,7 +38,10 @@ export default function Login() {
       console.warn("[login] nao foi possivel obter o perfil, usando rota default:", err);
     }
 
-    navigate(perfil === "admin" ? "/admin/dashboard" : "/dashboard");
+    let destino = "/dashboard";
+    if (perfil === "admin") destino = "/admin/dashboard";
+    else if (perfil === "ong") destino = "/ong/dashboard";
+    navigate(destino);
     setLoading(false);
   };
 
@@ -56,23 +56,6 @@ export default function Login() {
 
       {/* Card */}
       <div className="login-card">
-        {/* Role Selector */}
-        <div className="mb-4">
-          <label className="login-label mb-2">Entrar como:</label>
-          <div className="d-flex gap-2">
-            {roles.map((role) => (
-              <button
-                key={role}
-                type="button"
-                className={`login-role-btn ${selectedRole === role ? "active" : ""}`}
-                onClick={() => setSelectedRole(role)}
-              >
-                {role}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit}>
           {sucesso && (

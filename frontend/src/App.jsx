@@ -10,6 +10,7 @@ import MinhasDoacoes from "./pages/MinhasDoacoes";
 import Perfil from "./pages/Perfil";
 import RelatorioAdmin from "./pages/RelatorioAdmin";
 import DashboardAdmin from "./pages/DashboardAdmin";
+import DashboardOng from "./pages/DashboardOng";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
           <Route path="/admin/relatorio" element={<RelatorioAdmin />} />
+          <Route path="/ong/dashboard" element={<DashboardOng />} />
         </Route>
       </Routes>
     </BrowserRouter>
