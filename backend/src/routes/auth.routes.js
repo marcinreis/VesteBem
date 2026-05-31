@@ -12,7 +12,9 @@ const registerSchema = {
   nome: { type: 'string', required: true, minLength: 2 },
   telefone: { type: 'string' },
   endereco: { type: 'string' },
-  perfil: { type: 'enum', required: true, values: ['doador', 'beneficiario', 'ong'] },
+  perfil: { type: 'enum', required: true, values: ['usuario', 'ong'] },
+  cnpj: { type: 'string', minLength: 14, maxLength: 18 },
+  descricao: { type: 'string', maxLength: 500 },
 }
 
 const loginSchema = {

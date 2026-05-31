@@ -1,7 +1,7 @@
 import { db } from '../config/firebase.js'
 import { STATUS } from './doacao.service.js'
 
-const PERFIS = ['doador', 'beneficiario', 'ong', 'admin']
+const PERFIS = ['usuario', 'ong', 'admin']
 
 function tsToMillis(ts) {
   if (!ts) return 0

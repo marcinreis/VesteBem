@@ -3,7 +3,7 @@ import { HttpError } from '../middlewares/errorHandler.js'
 
 const FIREBASE_REST = 'https://identitytoolkit.googleapis.com/v1'
 // Admin nao pode ser criado pela API publica — use scripts/criar-admin.js.
-const PERFIS_VALIDOS = ['doador', 'beneficiario', 'ong']
+const PERFIS_VALIDOS = ['usuario', 'ong']
 
 function getApiKey() {
   const key = process.env.FIREBASE_WEB_API_KEY
@@ -31,9 +31,19 @@ async function callFirebaseRest(path, body) {
   return data
 }
 
-export async function register({ email, senha, nome, telefone, endereco, perfil }) {
+export async function register({ email, senha, nome, telefone, endereco, perfil, cnpj, descricao }) {
   if (!PERFIS_VALIDOS.includes(perfil)) {
     throw new HttpError(400, 'VALIDATION_ERROR', `perfil deve ser um de: ${PERFIS_VALIDOS.join(', ')}`)
+  }
+
+  if (perfil === 'ong') {
+    const cnpjLimpo = (cnpj ?? '').replace(/\D/g, '')
+    if (cnpjLimpo.length !== 14) {
+      throw new HttpError(400, 'VALIDATION_ERROR', 'cnpj e obrigatorio para ONG e deve ter 14 digitos')
+    }
+    if (!descricao || descricao.trim().length < 10) {
+      throw new HttpError(400, 'VALIDATION_ERROR', 'descricao institucional e obrigatoria para ONG (10+ caracteres)')
+    }
   }
 
   let user
@@ -49,15 +59,21 @@ export async function register({ email, senha, nome, telefone, endereco, perfil 
     throw err
   }
 
+  const dadosUsuario = {
+    nome,
+    email,
+    telefone: telefone ?? null,
+    endereco: endereco ?? null,
+    perfil,
+    criadoEm: admin.firestore.FieldValue.serverTimestamp(),
+  }
+  if (perfil === 'ong') {
+    dadosUsuario.cnpj = cnpj.replace(/\D/g, '')
+    dadosUsuario.descricao = descricao.trim()
+  }
+
   try {
-    await db.collection('usuarios').doc(user.uid).set({
-      nome,
-      email,
-      telefone: telefone ?? null,
-      endereco: endereco ?? null,
-      perfil,
-      criadoEm: admin.firestore.FieldValue.serverTimestamp(),
-    })
+    await db.collection('usuarios').doc(user.uid).set(dadosUsuario)
   } catch (err) {
     // Rollback: se falhar gravar perfil, remove a conta do Auth pra nao deixar orfa.
     await auth.deleteUser(user.uid).catch(() => {})
