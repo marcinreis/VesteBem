@@ -1,8 +1,28 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../services/firebase";
 import { listarMinhasDoacoes, editarDoacao, cancelarDoacao } from "../services/doacoesService";
+import {
+  criarSolicitacao,
+  listarMinhasSolicitacoes,
+  cancelarSolicitacao,
+} from "../services/solicitacoesService";
+import { obterMeuPerfil } from "../services/usuariosService";
 import EditarDoacaoModal from "../components/EditarDoacaoModal";
 import "../pages_css/Dashboard.css";
+
+const SOL_STATUS = {
+  PENDENTE: "Pendente",
+  ATENDIDA: "Atendida",
+  CANCELADA: "Cancelada",
+};
+
+const solStatusClass = {
+  [SOL_STATUS.PENDENTE]: "badge-disponivel",
+  [SOL_STATUS.ATENDIDA]: "badge-entregue",
+  [SOL_STATUS.CANCELADA]: "badge-cancelada",
+};
 
 const STATUS = {
   DISPONIVEL: "Disponível",
@@ -32,18 +52,55 @@ function formatData(ts) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [aba, setAba] = useState("doacoes");
   const [doacoes, setDoacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [editandoDoacao, setEditandoDoacao] = useState(null);
   const [cancelandoId, setCancelandoId] = useState(null);
+  const [perfil, setPerfil] = useState(undefined);
+
+  const [solicitacoes, setSolicitacoes] = useState([]);
+  const [loadingSol, setLoadingSol] = useState(true);
+  const [erroSol, setErroSol] = useState("");
+  const [formSol, setFormSol] = useState({ tipoPeca: "", tamanho: "", quantidade: 1 });
+  const [enviandoSol, setEnviandoSol] = useState(false);
+  const [cancelandoSolId, setCancelandoSolId] = useState(null);
 
   useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        setPerfil(null);
+        return;
+      }
+      obterMeuPerfil()
+        .then((dados) => setPerfil(dados?.perfil ?? null))
+        .catch(() => setPerfil(null));
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (perfil === undefined || perfil === "admin" || perfil === "ong") return;
     listarMinhasDoacoes()
       .then((lista) => setDoacoes(lista))
       .catch((err) => setErro(err.message || "Erro ao carregar doações."))
       .finally(() => setLoading(false));
-  }, []);
+    listarMinhasSolicitacoes()
+      .then((lista) => setSolicitacoes(lista))
+      .catch((err) => setErroSol(err.message || "Erro ao carregar solicitações."))
+      .finally(() => setLoadingSol(false));
+  }, [perfil]);
+
+  if (perfil === undefined) {
+    return <p style={{ padding: 16 }}>Carregando...</p>;
+  }
+  if (perfil === "admin") {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  if (perfil === "ong") {
+    return <Navigate to="/ong/dashboard" replace />;
+  }
 
   const totalDoacoes = doacoes.length;
   const totalEntregues = doacoes.filter((d) => d.status === STATUS.ENTREGUE).length;
@@ -72,6 +129,45 @@ export default function Dashboard() {
       setCancelandoId(null);
     }
   };
+
+  const handleCriarSolicitacao = async (e) => {
+    e.preventDefault();
+    setErroSol("");
+    setEnviandoSol(true);
+    try {
+      const nova = await criarSolicitacao({
+        tipoPeca: formSol.tipoPeca.trim(),
+        tamanho: formSol.tamanho.trim(),
+        quantidade: Number(formSol.quantidade),
+      });
+      setSolicitacoes((prev) => [nova, ...prev]);
+      setFormSol({ tipoPeca: "", tamanho: "", quantidade: 1 });
+    } catch (err) {
+      setErroSol(err.message || "Erro ao criar solicitação.");
+    } finally {
+      setEnviandoSol(false);
+    }
+  };
+
+  const handleCancelarSolicitacao = async (sol) => {
+    if (!window.confirm(`Cancelar solicitação de "${sol.tipoPeca}"?`)) return;
+    setErroSol("");
+    setCancelandoSolId(sol.id);
+    try {
+      const atualizada = await cancelarSolicitacao(sol.id);
+      setSolicitacoes((prev) => prev.map((s) => (s.id === sol.id ? { ...s, ...atualizada } : s)));
+    } catch (err) {
+      setErroSol(err.message || "Erro ao cancelar solicitação.");
+    } finally {
+      setCancelandoSolId(null);
+    }
+  };
+
+  const solOrdenadas = [...solicitacoes].sort(
+    (a, b) => (b.criadoEm?._seconds ?? 0) - (a.criadoEm?._seconds ?? 0),
+  );
+  const totalSolPendentes = solicitacoes.filter((s) => s.status === SOL_STATUS.PENDENTE).length;
+  const totalSolAtendidas = solicitacoes.filter((s) => s.status === SOL_STATUS.ATENDIDA).length;
 
   const cards = [
     {
@@ -116,10 +212,31 @@ export default function Dashboard() {
   return (
     <div className="dash-wrapper">
       <div className="dash-header">
-        <h1 className="dash-title">Dashboard do Doador</h1>
-        <p className="dash-subtitle">Acompanhe o impacto das suas doações</p>
+        <h1 className="dash-title">Dashboard</h1>
+        <p className="dash-subtitle">
+          Acompanhe suas doações e solicitações em um só lugar
+        </p>
       </div>
 
+      <div className="dash-tabs">
+        <button
+          type="button"
+          className={`dash-tab ${aba === "doacoes" ? "active" : ""}`}
+          onClick={() => setAba("doacoes")}
+        >
+          Doações
+        </button>
+        <button
+          type="button"
+          className={`dash-tab ${aba === "solicitacoes" ? "active" : ""}`}
+          onClick={() => setAba("solicitacoes")}
+        >
+          Solicitações
+        </button>
+      </div>
+
+      {aba === "doacoes" && (
+      <>
       {erro && <div className="dash-error">{erro}</div>}
 
       <div className="dash-cards">
@@ -214,6 +331,153 @@ export default function Dashboard() {
           onSalvar={handleSalvarEdicao}
           onFechar={() => setEditandoDoacao(null)}
         />
+      )}
+      </>
+      )}
+
+      {aba === "solicitacoes" && (
+      <>
+      {erroSol && <div className="dash-error">{erroSol}</div>}
+
+      <div className="dash-cards">
+        <div className="dash-card">
+          <div className="dash-card-info">
+            <span className="dash-card-label">Total de Solicitações</span>
+            <span className="dash-card-valor">{loadingSol ? "—" : solicitacoes.length}</span>
+          </div>
+          <div className="dash-card-icon" style={{ background: "#3b82f6" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+        </div>
+        <div className="dash-card">
+          <div className="dash-card-info">
+            <span className="dash-card-label">Pendentes</span>
+            <span className="dash-card-valor">{loadingSol ? "—" : totalSolPendentes}</span>
+          </div>
+          <div className="dash-card-icon" style={{ background: "#f59e0b" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+        </div>
+        <div className="dash-card">
+          <div className="dash-card-info">
+            <span className="dash-card-label">Atendidas</span>
+            <span className="dash-card-valor">{loadingSol ? "—" : totalSolAtendidas}</span>
+          </div>
+          <div className="dash-card-icon" style={{ background: "#2ec4a5" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div className="dash-recentes">
+        <div className="dash-recentes-header">
+          <div>
+            <p className="dash-recentes-title">Nova Solicitação</p>
+            <p className="dash-recentes-desc">Informe o que você precisa</p>
+          </div>
+        </div>
+        <form className="dash-sol-form" onSubmit={handleCriarSolicitacao}>
+          <div className="dash-sol-row">
+            <input
+              type="text"
+              className="dash-sol-input"
+              placeholder="Tipo de peça (ex.: camisa)"
+              value={formSol.tipoPeca}
+              onChange={(e) => setFormSol({ ...formSol, tipoPeca: e.target.value })}
+              required
+              minLength={2}
+              disabled={enviandoSol}
+            />
+            <input
+              type="text"
+              className="dash-sol-input"
+              placeholder="Tamanho (ex.: M)"
+              value={formSol.tamanho}
+              onChange={(e) => setFormSol({ ...formSol, tamanho: e.target.value })}
+              required
+              disabled={enviandoSol}
+            />
+            <input
+              type="number"
+              className="dash-sol-input"
+              placeholder="Qtd"
+              value={formSol.quantidade}
+              onChange={(e) => setFormSol({ ...formSol, quantidade: e.target.value })}
+              required
+              min={1}
+              disabled={enviandoSol}
+            />
+            <button type="submit" className="dash-ver-todas" disabled={enviandoSol}>
+              {enviandoSol ? "Enviando..." : "+ Solicitar"}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="dash-recentes">
+        <div className="dash-recentes-header">
+          <div>
+            <p className="dash-recentes-title">Minhas Solicitações</p>
+            <p className="dash-recentes-desc">Acompanhe o status dos seus pedidos</p>
+          </div>
+        </div>
+
+        <div className="dash-lista">
+          {loadingSol ? (
+            <p className="dash-empty">Carregando...</p>
+          ) : solOrdenadas.length === 0 ? (
+            <p className="dash-empty">Nenhuma solicitação registrada ainda.</p>
+          ) : (
+            solOrdenadas.map((sol) => {
+              const podeCancelar = sol.status === SOL_STATUS.PENDENTE;
+              return (
+                <div className="dash-item" key={sol.id}>
+                  <div className="dash-item-left">
+                    <div className="dash-item-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ec4a5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="dash-item-nome">
+                        {sol.tipoPeca} · Tam {sol.tamanho} · Qtd {sol.quantidade}
+                      </p>
+                      <p className="dash-item-data">📅 {formatData(sol.criadoEm)}</p>
+                    </div>
+                  </div>
+                  <div className="dash-item-right">
+                    <span className={`dash-badge ${solStatusClass[sol.status] ?? ""}`}>
+                      {sol.status}
+                    </span>
+                    {podeCancelar && (
+                      <div className="dash-item-actions">
+                        <button
+                          type="button"
+                          className="dash-btn-cancelar"
+                          onClick={() => handleCancelarSolicitacao(sol)}
+                          disabled={cancelandoSolId === sol.id}
+                        >
+                          {cancelandoSolId === sol.id ? "Cancelando..." : "Cancelar"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+      </>
       )}
     </div>
   );

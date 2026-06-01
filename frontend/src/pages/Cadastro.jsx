@@ -8,12 +8,12 @@ import logo from "../imagens/logoVesteBem.png"
 
 
 const roles = [
-  { id: "doador", label: "Doador", desc: "Quero doar roupas" },
-  { id: "beneficiario", label: "Beneficiário/ONG", desc: "Preciso de roupas" },
+  { id: "usuario", label: "Pessoa Física", desc: "Quero doar e/ou solicitar roupas" },
+  { id: "ong", label: "ONG / Instituição", desc: "Vamos receber doações para redistribuir" },
 ];
 
 export default function Cadastro() {
-  const [selectedRole, setSelectedRole] = useState("doador");
+  const [selectedRole, setSelectedRole] = useState("usuario");
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -21,6 +21,8 @@ export default function Cadastro() {
     confirmarSenha: "",
     telefone: "",
     endereco: "",
+    cnpj: "",
+    descricao: "",
   });
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,14 +41,31 @@ export default function Cadastro() {
       return;
     }
 
+    if (selectedRole === "ong") {
+      const cnpjDigits = form.cnpj.replace(/\D/g, "");
+      if (cnpjDigits.length !== 14) {
+        setErro("CNPJ deve ter 14 dígitos.");
+        return;
+      }
+      if (form.descricao.trim().length < 10) {
+        setErro("Descrição institucional precisa ter pelo menos 10 caracteres.");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      await cadastrar(form.email, form.senha, {
+      const dadosExtras = {
         nome: form.nome,
         telefone: form.telefone || undefined,
         endereco: form.endereco || undefined,
         perfil: selectedRole,
-      });
+      };
+      if (selectedRole === "ong") {
+        dadosExtras.cnpj = form.cnpj.replace(/\D/g, "");
+        dadosExtras.descricao = form.descricao.trim();
+      }
+      await cadastrar(form.email, form.senha, dadosExtras);
       navigate("/login", { state: { sucessoCadastro: true, email: form.email } });
     } catch (err) {
       setErro(err.message || "Erro ao criar conta.");
@@ -224,6 +243,49 @@ export default function Cadastro() {
                 />
               </div>
             </div>
+
+            {selectedRole === "ong" && (
+              <>
+                {/* CNPJ */}
+                <div className="col-12 col-md-6">
+                  <label className="cadastro-label mb-1">CNPJ *</label>
+                  <div className="cadastro-input-wrapper">
+                    <span className="cadastro-input-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="16" rx="2"/>
+                        <path d="M3 10h18"/>
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      name="cnpj"
+                      className="cadastro-input"
+                      placeholder="00.000.000/0000-00"
+                      value={form.cnpj}
+                      onChange={handleChange}
+                      required
+                      maxLength={18}
+                    />
+                  </div>
+                </div>
+
+                {/* Descrição institucional */}
+                <div className="col-12">
+                  <label className="cadastro-label mb-1">Descrição institucional *</label>
+                  <textarea
+                    name="descricao"
+                    className="cadastro-input"
+                    style={{ minHeight: 80, padding: "10px 14px" }}
+                    placeholder="Conte brevemente o que sua ONG faz, áreas de atuação, público atendido..."
+                    value={form.descricao}
+                    onChange={handleChange}
+                    required
+                    minLength={10}
+                    maxLength={500}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* Submit */}

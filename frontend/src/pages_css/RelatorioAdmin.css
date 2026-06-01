@@ -1,0 +1,110 @@
+.rel-wrapper {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 16px;
+}
+
+.rel-header {
+  margin-bottom: 24px;
+}
+
+.rel-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.rel-subtitle {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.rel-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.rel-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.rel-card-label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.rel-card-valor {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.rel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.rel-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.rel-section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rel-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rel-lista li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.rel-lista li:last-child {
+  border-bottom: none;
+}
+
+.rel-lista li span {
+  color: #374151;
+  text-transform: capitalize;
+}
+
+.rel-lista li strong {
+  color: #111827;
+  white-space: nowrap;
+}
+
+.rel-empty {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+}
+
+.rel-erro {
+  color: #b91c1c;
+  padding: 16px;
+}

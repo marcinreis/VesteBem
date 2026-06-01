@@ -9,6 +9,8 @@ import authRoutes from './routes/auth.routes.js'
 import doacaoRoutes from './routes/doacao.routes.js'
 import catalogoRoutes from './routes/catalogo.routes.js'
 import usuarioRoutes from './routes/usuario.routes.js'
+import adminRoutes from './routes/admin.routes.js'
+import solicitacaoRoutes from './routes/solicitacao.routes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -35,6 +37,8 @@ app.use('/auth', authRoutes)
 app.use('/doacoes', doacaoRoutes)
 app.use('/catalogo', catalogoRoutes)
 app.use('/usuarios', usuarioRoutes)
+app.use('/admin', adminRoutes)
+app.use('/solicitacoes', solicitacaoRoutes)
 
 app.use(errorHandler)
 
