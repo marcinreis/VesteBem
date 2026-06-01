@@ -267,6 +267,48 @@
   cursor: not-allowed;
 }
 
+.dash-btn-entregar {
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #2ec4a5;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dash-btn-entregar:hover:not(:disabled) {
+  background: #25a98d;
+}
+
+.dash-btn-entregar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dash-btn-solicitar {
+  padding: 0.4rem 0.95rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #2ec4a5;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dash-btn-solicitar:hover:not(:disabled) {
+  background: #25a98d;
+}
+
+.dash-btn-solicitar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .dash-item-icon {
   width: 40px;
   height: 40px;
@@ -289,6 +331,13 @@
   font-size: 0.78rem;
   color: #9ca3af;
   margin: 0;
+}
+
+.dash-item-desc {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0.3rem 0 0;
+  line-height: 1.35;
 }
 
 /* ── Badges ───────────────────────────────────────────────── */
@@ -314,6 +363,11 @@
   color: #d97706;
 }
 
+.badge-reservada {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
 .badge-cancelada {
   background: #fee2e2;
   color: #ef4444;
@@ -326,6 +380,19 @@
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fecaca;
+  border-radius: 0.625rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Sucesso ──────────────────────────────────────────────── */
+.dash-sucesso {
+  width: 100%;
+  max-width: 860px;
+  background: #e6f7f3;
+  color: #0f766e;
+  border: 1px solid #99e6d5;
   border-radius: 0.625rem;
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
