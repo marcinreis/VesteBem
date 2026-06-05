@@ -52,7 +52,29 @@ export async function criar(usuarioId, dados) {
     atualizadoEm: admin.firestore.FieldValue.serverTimestamp(),
   }
   const ref = await db.collection(COLLECTION).add(novo)
+
+  // Doação feita pela Vitrine de demandas: fecha o pedido livre que ela atende.
+  if (dados.demandaId) {
+    await marcarDemandaAtendida(String(dados.demandaId))
+  }
+
   return { id: ref.id, ...novo, criadoEm: null, atualizadoEm: null }
+}
+
+// Marca um pedido do fluxo livre (sem peça vinculada) como Atendida quando alguém
+// doa para atendê-lo pela Vitrine de demandas. Mantido tolerante: ignora em silêncio
+// se o pedido nao existe mais ou ja saiu de Pendente.
+async function marcarDemandaAtendida(demandaId) {
+  const ref = db.collection('solicitacoes').doc(demandaId)
+  const snap = await ref.get()
+  if (!snap.exists) return
+  const data = snap.data()
+  if (data.doacaoId == null && data.status === SOLICITACAO_PENDENTE) {
+    await ref.update({
+      status: SOLICITACAO_ATENDIDA,
+      atualizadoEm: admin.firestore.FieldValue.serverTimestamp(),
+    })
+  }
 }
 
 export async function listarDoUsuario(uid) {
