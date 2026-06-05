@@ -83,6 +83,42 @@ export async function criar(usuario, dados) {
   return { id: solRef.id, ...novo, criadoEm: null, atualizadoEm: null }
 }
 
+// Vitrine de demandas: solicitacoes do fluxo livre (sem doacaoId) ainda pendentes,
+// para que doadores vejam o que a comunidade precisa e doem contra essa necessidade.
+export async function listarDemandas() {
+  const snap = await db.collection(COLLECTION).where('status', '==', STATUS.PENDENTE).get()
+  const livres = snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((s) => s.doacaoId == null)
+  if (livres.length === 0) return []
+
+  // Enriquece com quem pediu (nome/perfil) para exibir na vitrine.
+  const solicitanteIds = [...new Set(livres.map((s) => s.usuarioId).filter(Boolean))]
+  const userRefs = solicitanteIds.map((u) => db.collection(USUARIOS_COLLECTION).doc(u))
+  const userDocs = userRefs.length ? await db.getAll(...userRefs) : []
+  const usuariosPorId = new Map(userDocs.map((d) => [d.id, d.exists ? d.data() : null]))
+
+  const millis = (ts) => (ts && typeof ts.toMillis === 'function' ? ts.toMillis() : 0)
+
+  return livres
+    .map((s) => {
+      const u = usuariosPorId.get(s.usuarioId) ?? null
+      const ehOng = u?.perfil === 'ong'
+      // Privacidade: ONG aparece com nome institucional; pessoa fisica so o primeiro nome.
+      const solicitante = ehOng ? u?.nome ?? 'ONG' : u?.nome?.split(' ')[0] ?? 'Anônimo'
+      return {
+        id: s.id,
+        tipoPeca: s.tipoPeca,
+        tamanho: s.tamanho,
+        quantidade: s.quantidade,
+        criadoEm: s.criadoEm ?? null,
+        solicitante,
+        ehOng,
+      }
+    })
+    .sort((a, b) => millis(b.criadoEm) - millis(a.criadoEm))
+}
+
 export async function listarDoUsuario(uid) {
   const snap = await db.collection(COLLECTION).where('usuarioId', '==', uid).get()
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))

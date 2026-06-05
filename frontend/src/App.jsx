@@ -12,6 +12,7 @@ import RelatorioAdmin from "./pages/RelatorioAdmin";
 import DashboardAdmin from "./pages/DashboardAdmin";
 import DashboardOng from "./pages/DashboardOng";
 import PontosDeColeta from "./pages/PontosDeColeta";
+import Demandas from "./pages/Demandas";
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
           <Route path="/admin/relatorio" element={<RelatorioAdmin />} />
           <Route path="/ong/dashboard" element={<DashboardOng />} />
           <Route path="/pontos-de-coleta" element={<PontosDeColeta />} />
+          <Route path="/demandas" element={<Demandas />} />
         </Route>
       </Routes>
     </BrowserRouter>

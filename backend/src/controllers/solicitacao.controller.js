@@ -18,6 +18,15 @@ export async function listarMinhas(req, res, next) {
   }
 }
 
+export async function listarDemandas(req, res, next) {
+  try {
+    const demandas = await solicitacaoService.listarDemandas()
+    res.status(200).json(demandas)
+  } catch (err) {
+    next(err)
+  }
+}
+
 export async function listarRecebidas(req, res, next) {
   try {
     const sols = await solicitacaoService.listarRecebidas(req.user.uid)

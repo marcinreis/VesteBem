@@ -18,6 +18,7 @@ router.use(authAspect)
 
 router.post('/', validate(criarSchema), solicitacaoController.criar)
 router.get('/me', solicitacaoController.listarMinhas)
+router.get('/demandas', solicitacaoController.listarDemandas)
 router.get('/recebidas', solicitacaoController.listarRecebidas)
 router.patch('/:id/cancelar', solicitacaoController.cancelar)
 
