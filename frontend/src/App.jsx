@@ -11,6 +11,8 @@ import Perfil from "./pages/Perfil";
 import RelatorioAdmin from "./pages/RelatorioAdmin";
 import DashboardAdmin from "./pages/DashboardAdmin";
 import DashboardOng from "./pages/DashboardOng";
+import PontosDeColeta from "./pages/PontosDeColeta";
+
 
 function App() {
   return (
@@ -28,6 +30,7 @@ function App() {
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
           <Route path="/admin/relatorio" element={<RelatorioAdmin />} />
           <Route path="/ong/dashboard" element={<DashboardOng />} />
+          <Route path="/pontos-de-coleta" element={<PontosDeColeta />} />
         </Route>
       </Routes>
     </BrowserRouter>

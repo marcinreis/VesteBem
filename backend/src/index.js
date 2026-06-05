@@ -11,6 +11,7 @@ import catalogoRoutes from './routes/catalogo.routes.js'
 import usuarioRoutes from './routes/usuario.routes.js'
 import adminRoutes from './routes/admin.routes.js'
 import solicitacaoRoutes from './routes/solicitacao.routes.js'
+import pontoColetaRoutes from './routes/pontoColeta.routes.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -39,6 +40,7 @@ app.use('/catalogo', catalogoRoutes)
 app.use('/usuarios', usuarioRoutes)
 app.use('/admin', adminRoutes)
 app.use('/solicitacoes', solicitacaoRoutes)
+app.use('/pontos-coleta', pontoColetaRoutes)
 
 app.use(errorHandler)
 
