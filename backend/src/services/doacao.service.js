@@ -5,9 +5,15 @@ const COLLECTION = 'doacoes'
 
 export const STATUS = Object.freeze({
   DISPONIVEL: 'Disponível',
+  RESERVADA: 'Reservada',
   ENTREGUE: 'Entregue',
   CANCELADA: 'Cancelada',
 })
+
+// Status da solicitacao usado ao fechar o ciclo na confirmacao de entrega.
+// Mantido como literal para evitar import circular com solicitacao.service.
+const SOLICITACAO_PENDENTE = 'Pendente'
+const SOLICITACAO_ATENDIDA = 'Atendida'
 
 const CAMPOS_EDITAVEIS = ['tipoPeca', 'tamanho', 'conservacao', 'descricao', 'fotoUrl', 'cidade']
 
@@ -90,6 +96,22 @@ export async function confirmarEntrega(id, uid) {
     status: STATUS.ENTREGUE,
     atualizadoEm: admin.firestore.FieldValue.serverTimestamp(),
   })
+
+  // Fecha o ciclo: marca como 'Atendida' as solicitacoes pendentes vinculadas a
+  // essa peca (so existem quando o pedido veio do catalogo, com doacaoId).
+  const solSnap = await db.collection('solicitacoes').where('doacaoId', '==', id).get()
+  const pendentes = solSnap.docs.filter((d) => d.data().status === SOLICITACAO_PENDENTE)
+  if (pendentes.length > 0) {
+    const batch = db.batch()
+    for (const d of pendentes) {
+      batch.update(d.ref, {
+        status: SOLICITACAO_ATENDIDA,
+        atualizadoEm: admin.firestore.FieldValue.serverTimestamp(),
+      })
+    }
+    await batch.commit()
+  }
+
   const atualizado = await ref.get()
   return { id, ...atualizado.data() }
 }

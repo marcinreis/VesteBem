@@ -18,6 +18,15 @@ export async function listarMinhas(req, res, next) {
   }
 }
 
+export async function listarRecebidas(req, res, next) {
+  try {
+    const sols = await solicitacaoService.listarRecebidas(req.user.uid)
+    res.status(200).json(sols)
+  } catch (err) {
+    next(err)
+  }
+}
+
 export async function cancelar(req, res, next) {
   try {
     const sol = await solicitacaoService.cancelar(req.params.id, req.user.uid)

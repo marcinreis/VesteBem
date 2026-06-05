@@ -5,12 +5,14 @@ import "../pages_css/DashboardAdmin.css";
 
 const STATUS = {
   DISPONIVEL: "Disponível",
+  RESERVADA: "Reservada",
   ENTREGUE: "Entregue",
   CANCELADA: "Cancelada",
 };
 
 const statusClass = {
   [STATUS.DISPONIVEL]: "adm-badge-disponivel",
+  [STATUS.RESERVADA]: "adm-badge-reservada",
   [STATUS.ENTREGUE]: "adm-badge-entregue",
   [STATUS.CANCELADA]: "adm-badge-cancelada",
 };
@@ -64,7 +66,10 @@ export default function DashboardAdmin() {
   if (!data) return null;
 
   const t = data.totais;
-  const taxaEntrega = t.doacoes > 0 ? Math.round((t.entregues / t.doacoes) * 100) : 0;
+  // Taxa sobre doações não canceladas: canceladas nunca tiveram chance de ser
+  // entregues, então não devem puxar o indicador de impacto para baixo.
+  const baseEntrega = t.entregues + t.disponiveis + (t.reservadas ?? 0);
+  const taxaEntrega = baseEntrega > 0 ? Math.round((t.entregues / baseEntrega) * 100) : 0;
 
   const cards = [
     {
@@ -86,10 +91,22 @@ export default function DashboardAdmin() {
       cor: "#f59e0b",
     },
     {
+      label: "Reservadas",
+      valor: t.reservadas ?? 0,
+      desc: "Com solicitação pendente",
+      cor: "#7c3aed",
+    },
+    {
       label: "Canceladas",
       valor: t.canceladas,
       desc: "Doações canceladas",
       cor: "#ef4444",
+    },
+    {
+      label: "Solicitações",
+      valor: t.solicitacoes ?? 0,
+      desc: `${t.solicitacoesPendentes ?? 0} pendentes · ${t.solicitacoesAtendidas ?? 0} atendidas`,
+      cor: "#0ea5e9",
     },
     {
       label: "Usuários cadastrados",

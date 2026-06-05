@@ -39,8 +39,10 @@ export default function RelatorioAdmin() {
   const cards = [
     { label: "Total de Doações", valor: data.totais.doacoes, cor: "#3b82f6" },
     { label: "Disponíveis", valor: data.totais.disponiveis, cor: "#2ec4a5" },
+    { label: "Reservadas", valor: data.totais.reservadas ?? 0, cor: "#7c3aed" },
     { label: "Entregues", valor: data.totais.entregues, cor: "#f59e0b" },
     { label: "Canceladas", valor: data.totais.canceladas, cor: "#ef4444" },
+    { label: "Solicitações", valor: data.totais.solicitacoes ?? 0, cor: "#0ea5e9" },
     { label: "Usuários Cadastrados", valor: data.totais.usuarios, cor: "#8b5cf6" },
   ];
 

@@ -42,6 +42,7 @@ export default function DashboardOng() {
   const [formSol, setFormSol] = useState({ tipoPeca: "", tamanho: "", quantidade: 1 });
   const [enviandoSol, setEnviandoSol] = useState(false);
   const [cancelandoSolId, setCancelandoSolId] = useState(null);
+  const [solicitandoPecaId, setSolicitandoPecaId] = useState(null);
 
   const carregarCatalogo = (filtrosAtivos = {}) => {
     setLoadingCat(true);
@@ -91,6 +92,26 @@ export default function DashboardOng() {
       setErroSol(err.message || "Erro ao criar solicitação.");
     } finally {
       setEnviandoSol(false);
+    }
+  };
+
+  const handleSolicitarPeca = async (peca) => {
+    setErroCat("");
+    setSolicitandoPecaId(peca.id);
+    try {
+      const nova = await criarSolicitacao({
+        tipoPeca: peca.tipoPeca,
+        tamanho: peca.tamanho,
+        quantidade: 1,
+        doacaoId: peca.id,
+      });
+      setSolicitacoes((prev) => [nova, ...prev]);
+      // A peca foi reservada no back-end; remove do catalogo de disponiveis.
+      setCatalogo((prev) => prev.filter((p) => p.id !== peca.id));
+    } catch (err) {
+      setErroCat(err.message || "Erro ao solicitar peça.");
+    } finally {
+      setSolicitandoPecaId(null);
     }
   };
 
@@ -183,6 +204,14 @@ export default function DashboardOng() {
                 <p className="ong-peca-meta">Conservação: {peca.conservacao ?? "—"}</p>
                 <p className="ong-peca-meta">Cidade: {peca.cidade ?? "—"}</p>
                 {peca.descricao && <p className="ong-peca-desc">{peca.descricao}</p>}
+                <button
+                  type="button"
+                  className="ong-btn-primary ong-peca-btn"
+                  onClick={() => handleSolicitarPeca(peca)}
+                  disabled={solicitandoPecaId === peca.id}
+                >
+                  {solicitandoPecaId === peca.id ? "Solicitando..." : "Solicitar esta peça"}
+                </button>
               </div>
             ))}
           </div>

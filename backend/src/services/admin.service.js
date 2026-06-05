@@ -18,19 +18,33 @@ function topN(obj, n = 5) {
     .map(([nome, total]) => ({ nome, total }))
 }
 
+const SOL_STATUS = { PENDENTE: 'Pendente', ATENDIDA: 'Atendida', CANCELADA: 'Cancelada' }
+
 export async function gerarRelatorio() {
-  const [doacoesSnap, usuariosSnap] = await Promise.all([
+  const [doacoesSnap, usuariosSnap, solicitacoesSnap] = await Promise.all([
     db.collection('doacoes').get(),
     db.collection('usuarios').get(),
+    db.collection('solicitacoes').get(),
   ])
 
   const doacoes = doacoesSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
   const usuarios = usuariosSnap.docs.map((u) => ({ id: u.id, ...u.data() }))
+  const solicitacoes = solicitacoesSnap.docs.map((s) => ({ id: s.id, ...s.data() }))
 
   const porStatus = {
     [STATUS.DISPONIVEL]: 0,
+    [STATUS.RESERVADA]: 0,
     [STATUS.ENTREGUE]: 0,
     [STATUS.CANCELADA]: 0,
+  }
+
+  const solPorStatus = {
+    [SOL_STATUS.PENDENTE]: 0,
+    [SOL_STATUS.ATENDIDA]: 0,
+    [SOL_STATUS.CANCELADA]: 0,
+  }
+  for (const s of solicitacoes) {
+    if (s.status in solPorStatus) solPorStatus[s.status]++
   }
   const porTipo = {}
   const porCidade = {}
@@ -75,9 +89,13 @@ export async function gerarRelatorio() {
     totais: {
       doacoes: doacoes.length,
       disponiveis: porStatus[STATUS.DISPONIVEL],
+      reservadas: porStatus[STATUS.RESERVADA],
       entregues: porStatus[STATUS.ENTREGUE],
       canceladas: porStatus[STATUS.CANCELADA],
       usuarios: usuarios.length,
+      solicitacoes: solicitacoes.length,
+      solicitacoesPendentes: solPorStatus[SOL_STATUS.PENDENTE],
+      solicitacoesAtendidas: solPorStatus[SOL_STATUS.ATENDIDA],
     },
     usuariosPorPerfil,
     topTipos: topN(porTipo),

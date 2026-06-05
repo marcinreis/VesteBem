@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../services/firebase";
-import { listarMinhasDoacoes, editarDoacao, cancelarDoacao } from "../services/doacoesService";
+import {
+  listarMinhasDoacoes,
+  editarDoacao,
+  cancelarDoacao,
+  confirmarEntrega,
+} from "../services/doacoesService";
 import {
   criarSolicitacao,
   listarMinhasSolicitacoes,
   cancelarSolicitacao,
+  listarSolicitacoesRecebidas,
 } from "../services/solicitacoesService";
+import { listarCatalogo } from "../services/catalogoService";
 import { obterMeuPerfil } from "../services/usuariosService";
 import EditarDoacaoModal from "../components/EditarDoacaoModal";
 import "../pages_css/Dashboard.css";
@@ -26,12 +33,14 @@ const solStatusClass = {
 
 const STATUS = {
   DISPONIVEL: "Disponível",
+  RESERVADA: "Reservada",
   ENTREGUE: "Entregue",
   CANCELADA: "Cancelada",
 };
 
 const statusClass = {
   [STATUS.DISPONIVEL]: "badge-disponivel",
+  [STATUS.RESERVADA]: "badge-reservada",
   [STATUS.ENTREGUE]: "badge-entregue",
   [STATUS.CANCELADA]: "badge-cancelada",
 };
@@ -58,6 +67,7 @@ export default function Dashboard() {
   const [erro, setErro] = useState("");
   const [editandoDoacao, setEditandoDoacao] = useState(null);
   const [cancelandoId, setCancelandoId] = useState(null);
+  const [confirmandoId, setConfirmandoId] = useState(null);
   const [perfil, setPerfil] = useState(undefined);
 
   const [solicitacoes, setSolicitacoes] = useState([]);
@@ -66,6 +76,15 @@ export default function Dashboard() {
   const [formSol, setFormSol] = useState({ tipoPeca: "", tamanho: "", quantidade: 1 });
   const [enviandoSol, setEnviandoSol] = useState(false);
   const [cancelandoSolId, setCancelandoSolId] = useState(null);
+
+  const [catalogo, setCatalogo] = useState([]);
+  const [loadingCat, setLoadingCat] = useState(true);
+  const [erroCat, setErroCat] = useState("");
+  const [catMsg, setCatMsg] = useState("");
+  const [solicitandoCatId, setSolicitandoCatId] = useState(null);
+
+  const [recebidas, setRecebidas] = useState([]);
+  const [loadingReceb, setLoadingReceb] = useState(true);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -90,6 +109,14 @@ export default function Dashboard() {
       .then((lista) => setSolicitacoes(lista))
       .catch((err) => setErroSol(err.message || "Erro ao carregar solicitações."))
       .finally(() => setLoadingSol(false));
+    listarCatalogo()
+      .then((lista) => setCatalogo(lista))
+      .catch((err) => setErroCat(err.message || "Erro ao carregar catálogo."))
+      .finally(() => setLoadingCat(false));
+    listarSolicitacoesRecebidas()
+      .then((lista) => setRecebidas(lista))
+      .catch(() => setRecebidas([]))
+      .finally(() => setLoadingReceb(false));
   }, [perfil]);
 
   if (perfil === undefined) {
@@ -130,6 +157,29 @@ export default function Dashboard() {
     }
   };
 
+  const handleConfirmarEntrega = async (doacao) => {
+    if (
+      !window.confirm(
+        `Confirmar entrega de "${doacao.tipoPeca}"? Esta ação não pode ser desfeita.`,
+      )
+    )
+      return;
+    setErro("");
+    setConfirmandoId(doacao.id);
+    try {
+      const atualizada = await confirmarEntrega(doacao.id);
+      setDoacoes((prev) => prev.map((d) => (d.id === doacao.id ? { ...d, ...atualizada } : d)));
+      // A entrega marca a solicitação vinculada como Atendida — recarrega os pedidos.
+      listarSolicitacoesRecebidas()
+        .then((lista) => setRecebidas(lista))
+        .catch(() => {});
+    } catch (err) {
+      setErro(err.message || "Erro ao confirmar entrega.");
+    } finally {
+      setConfirmandoId(null);
+    }
+  };
+
   const handleCriarSolicitacao = async (e) => {
     e.preventDefault();
     setErroSol("");
@@ -160,6 +210,30 @@ export default function Dashboard() {
       setErroSol(err.message || "Erro ao cancelar solicitação.");
     } finally {
       setCancelandoSolId(null);
+    }
+  };
+
+  const handleSolicitarPeca = async (peca) => {
+    setErroCat("");
+    setCatMsg("");
+    setSolicitandoCatId(peca.id);
+    try {
+      const nova = await criarSolicitacao({
+        tipoPeca: peca.tipoPeca,
+        tamanho: peca.tamanho,
+        quantidade: 1,
+        doacaoId: peca.id,
+      });
+      setSolicitacoes((prev) => [nova, ...prev]);
+      // A peça foi reservada — sai do catálogo de disponíveis.
+      setCatalogo((prev) => prev.filter((p) => p.id !== peca.id));
+      setCatMsg(
+        `Peça "${peca.tipoPeca}" reservada! A solicitação está na aba Solicitações.`,
+      );
+    } catch (err) {
+      setErroCat(err.message || "Erro ao solicitar peça.");
+    } finally {
+      setSolicitandoCatId(null);
     }
   };
 
@@ -228,6 +302,13 @@ export default function Dashboard() {
         </button>
         <button
           type="button"
+          className={`dash-tab ${aba === "catalogo" ? "active" : ""}`}
+          onClick={() => setAba("catalogo")}
+        >
+          Catálogo
+        </button>
+        <button
+          type="button"
           className={`dash-tab ${aba === "solicitacoes" ? "active" : ""}`}
           onClick={() => setAba("solicitacoes")}
         >
@@ -277,6 +358,10 @@ export default function Dashboard() {
           ) : (
             ordenadas.map((doacao) => {
               const podeEditar = doacao.status === STATUS.DISPONIVEL;
+              // REF06a: o doador pode confirmar a entrega (no ponto de coleta) tanto
+              // com a peça Disponível quanto Reservada por uma solicitação.
+              const podeEntregar =
+                doacao.status === STATUS.DISPONIVEL || doacao.status === STATUS.RESERVADA;
               return (
                 <div className="dash-item" key={doacao.id}>
                   <div className="dash-item-left">
@@ -297,30 +382,89 @@ export default function Dashboard() {
                     <span className={`dash-badge ${statusClass[doacao.status] ?? "badge-disponivel"}`}>
                       {doacao.status}
                     </span>
-                    {podeEditar && (
+                    {(podeEditar || podeEntregar) && (
                       <div className="dash-item-actions">
-                        <button
-                          type="button"
-                          className="dash-btn-editar"
-                          onClick={() => setEditandoDoacao(doacao)}
-                          disabled={cancelandoId === doacao.id}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          className="dash-btn-cancelar"
-                          onClick={() => handleCancelar(doacao)}
-                          disabled={cancelandoId === doacao.id}
-                        >
-                          {cancelandoId === doacao.id ? "Cancelando..." : "Cancelar"}
-                        </button>
+                        {podeEntregar && (
+                          <button
+                            type="button"
+                            className="dash-btn-entregar"
+                            onClick={() => handleConfirmarEntrega(doacao)}
+                            disabled={cancelandoId === doacao.id || confirmandoId === doacao.id}
+                          >
+                            {confirmandoId === doacao.id ? "Confirmando..." : "Confirmar entrega"}
+                          </button>
+                        )}
+                        {podeEditar && (
+                          <button
+                            type="button"
+                            className="dash-btn-editar"
+                            onClick={() => setEditandoDoacao(doacao)}
+                            disabled={cancelandoId === doacao.id || confirmandoId === doacao.id}
+                          >
+                            Editar
+                          </button>
+                        )}
+                        {podeEditar && (
+                          <button
+                            type="button"
+                            className="dash-btn-cancelar"
+                            onClick={() => handleCancelar(doacao)}
+                            disabled={cancelandoId === doacao.id || confirmandoId === doacao.id}
+                          >
+                            {cancelandoId === doacao.id ? "Cancelando..." : "Cancelar"}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
               );
             })
+          )}
+        </div>
+      </div>
+
+      <div className="dash-recentes">
+        <div className="dash-recentes-header">
+          <div>
+            <p className="dash-recentes-title">Pedidos recebidos</p>
+            <p className="dash-recentes-desc">Solicitações feitas nas suas peças</p>
+          </div>
+        </div>
+
+        <div className="dash-lista">
+          {loadingReceb ? (
+            <p className="dash-empty">Carregando...</p>
+          ) : recebidas.length === 0 ? (
+            <p className="dash-empty">Nenhum pedido nas suas peças ainda.</p>
+          ) : (
+            recebidas.map((p) => (
+              <div className="dash-item" key={p.id}>
+                <div className="dash-item-left">
+                  <div className="dash-item-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ec4a5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="dash-item-nome">
+                      {p.peca?.tipoPeca}
+                      {p.peca?.tamanho ? ` · Tam ${p.peca.tamanho}` : ""}
+                    </p>
+                    <p className="dash-item-data">
+                      👤 {p.solicitante?.nome || p.solicitante?.email || "Usuário"} · 📅{" "}
+                      {formatData(p.criadoEm)}
+                    </p>
+                  </div>
+                </div>
+                <div className="dash-item-right">
+                  <span className={`dash-badge ${solStatusClass[p.status] ?? ""}`}>
+                    {p.status}
+                  </span>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
@@ -332,6 +476,72 @@ export default function Dashboard() {
           onFechar={() => setEditandoDoacao(null)}
         />
       )}
+      </>
+      )}
+
+      {aba === "catalogo" && (
+      <>
+      {erroCat && <div className="dash-error">{erroCat}</div>}
+      {catMsg && <div className="dash-sucesso">{catMsg}</div>}
+
+      <div className="dash-recentes">
+        <div className="dash-recentes-header">
+          <div>
+            <p className="dash-recentes-title">Roupas disponíveis para doação</p>
+            <p className="dash-recentes-desc">Escolha uma peça e clique em Solicitar</p>
+          </div>
+        </div>
+
+        <div className="dash-lista">
+          {loadingCat ? (
+            <p className="dash-empty">Carregando catálogo...</p>
+          ) : catalogo.length === 0 ? (
+            <p className="dash-empty">Nenhuma peça disponível no momento.</p>
+          ) : (
+            catalogo.map((peca) => {
+              const meta = [
+                peca.conservacao && `Conservação: ${peca.conservacao}`,
+                peca.cidade && `📍 ${peca.cidade}`,
+                peca.criadoEm && `📅 ${formatData(peca.criadoEm)}`,
+              ]
+                .filter(Boolean)
+                .join(" · ");
+              return (
+                <div className="dash-item" key={peca.id}>
+                  <div className="dash-item-left">
+                    <div className="dash-item-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ec4a5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/>
+                        <path d="M12 22V7"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="dash-item-nome">
+                        {peca.tipoPeca}
+                        {peca.tamanho ? ` · Tam ${peca.tamanho}` : ""}
+                      </p>
+                      <p className="dash-item-data">{meta || "—"}</p>
+                      {peca.descricao && (
+                        <p className="dash-item-desc">{peca.descricao}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="dash-item-right">
+                    <button
+                      type="button"
+                      className="dash-btn-solicitar"
+                      onClick={() => handleSolicitarPeca(peca)}
+                      disabled={solicitandoCatId === peca.id}
+                    >
+                      {solicitandoCatId === peca.id ? "Solicitando..." : "Solicitar"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
       </>
       )}
 
