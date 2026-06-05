@@ -358,6 +358,8 @@ export default function Dashboard() {
           ) : (
             ordenadas.map((doacao) => {
               const podeEditar = doacao.status === STATUS.DISPONIVEL;
+              // REF06a: o doador pode confirmar a entrega (no ponto de coleta) tanto
+              // com a peça Disponível quanto Reservada por uma solicitação.
               const podeEntregar =
                 doacao.status === STATUS.DISPONIVEL || doacao.status === STATUS.RESERVADA;
               return (
