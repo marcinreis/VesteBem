@@ -5,7 +5,10 @@
 }
 
 .ong-header {
-  margin-bottom: 24px;
+   display: flex;
+   align-items: flex-start;
+   justify-content: space-between;
+   margin-bottom: 1.75rem;
 }
 
 .ong-title {
@@ -259,4 +262,22 @@
   color: #b91c1c;
   margin: 0 0 10px;
   font-weight: 500;
+}
+
+.ong-btn-pontos {
+  background: #f0fdf8;
+  color: #2ec4a5;
+  border: 1.5px solid #2ec4a5;
+  border-radius: 50rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ong-btn-pontos:hover {
+  background: #2ec4a5;
+  color: #fff;
 }

@@ -6,6 +6,7 @@ import {
   cancelarSolicitacao,
 } from "../services/solicitacoesService";
 import "../pages_css/DashboardOng.css";
+import { Link } from "react-router-dom";
 
 const SOL_STATUS = {
   PENDENTE: "Pendente",
@@ -150,6 +151,9 @@ export default function DashboardOng() {
             Veja peças disponíveis e registre o que sua instituição precisa receber.
           </p>
         </div>
+        <Link to="/ong/pontos-coleta/adicionar" className="ong-btn-pontos">
+          + Adicionar ponto de coleta
+        </Link>
       </div>
 
       <div className="ong-cards">
