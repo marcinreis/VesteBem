@@ -3,6 +3,7 @@ import { Router } from 'express'
 import * as pontoColetaController from '../controllers/pontoColeta.controller.js'
 import { authAspect } from '../middlewares/authAspect.js'
 import { adminAspect } from '../middlewares/adminAspect.js'
+import { ongOuAdminAspect } from '../middlewares/ongOuAdminAspect.js'
 
 const router = Router()
 
@@ -10,7 +11,7 @@ const router = Router()
 router.get('/', authAspect, pontoColetaController.listar)
 
 // Só admin cria e remove
-router.post('/', authAspect, adminAspect, pontoColetaController.criar)
+router.post('/', authAspect, ongOuAdminAspect, pontoColetaController.criar)
 router.delete('/:id', authAspect, adminAspect, pontoColetaController.remover)
 
 export default router

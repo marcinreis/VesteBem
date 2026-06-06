@@ -118,6 +118,9 @@ export default function DashboardAdmin() {
         <Link to="/admin/relatorio" className="adm-btn-relatorio">
           Ver relatório completo
         </Link>
+        <Link to="/admin/pontos-coleta" className="adm-btn-pontos">
+          + Adicionar ponto de coleta
+        </Link>
       </div>
 
       <div className="adm-cards">

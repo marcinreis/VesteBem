@@ -1,5 +1,6 @@
 import { auth, db, admin } from '../config/firebase.js'
 import { HttpError } from '../middlewares/errorHandler.js'
+import { buscarCoordenadas } from './geocoding.service.js' 
 
 const FIREBASE_REST = 'https://identitytoolkit.googleapis.com/v1'
 // Admin nao pode ser criado pela API publica — use scripts/criar-admin.js.
@@ -59,7 +60,7 @@ export async function register({ email, senha, nome, telefone, endereco, perfil,
     throw err
   }
 
-  const dadosUsuario = {
+   const dadosUsuario = {
     nome,
     email,
     telefone: telefone ?? null,
@@ -67,35 +68,44 @@ export async function register({ email, senha, nome, telefone, endereco, perfil,
     perfil,
     criadoEm: admin.firestore.FieldValue.serverTimestamp(),
   }
+
   if (perfil === 'ong') {
     dadosUsuario.cnpj = cnpj.replace(/\D/g, '')
     dadosUsuario.descricao = descricao.trim()
+
+    // ← ADICIONA: busca coordenadas do endereço da ONG
+    if (endereco) {
+      const coords = await buscarCoordenadas(endereco)
+      if (coords) {
+        dadosUsuario.lat = coords.lat
+        dadosUsuario.lng = coords.lng
+      }
+    }
   }
 
   try {
     await db.collection('usuarios').doc(user.uid).set(dadosUsuario)
+
+    // ← ADICIONA: cria ponto de coleta automático para ONG
+    if (perfil === 'ong' && dadosUsuario.lat && dadosUsuario.lng) {
+      await db.collection('pontosDeColeta').add({
+        nome,
+        endereco: endereco ?? '',
+        cidade: '',
+        lat: dadosUsuario.lat,
+        lng: dadosUsuario.lng,
+        criadoPor: user.uid,
+        tipoOrigem: 'ong',
+        ongUid: user.uid,
+        criadoEm: admin.firestore.FieldValue.serverTimestamp(),
+      })
+    }
   } catch (err) {
-    // Rollback: se falhar gravar perfil, remove a conta do Auth pra nao deixar orfa.
     await auth.deleteUser(user.uid).catch(() => {})
     throw err
   }
 
   return { uid: user.uid, email: user.email, perfil }
-}
-
-export async function login({ email, senha }) {
-  const data = await callFirebaseRest('/accounts:signInWithPassword', {
-    email,
-    password: senha,
-    returnSecureToken: true,
-  })
-  return {
-    uid: data.localId,
-    email: data.email,
-    idToken: data.idToken,
-    refreshToken: data.refreshToken,
-    expiresIn: data.expiresIn,
-  }
 }
 
 export async function logout(uid) {

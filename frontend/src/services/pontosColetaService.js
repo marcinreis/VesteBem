@@ -45,3 +45,12 @@ export async function listarPontosColeta() {
   });
   return handle(res);
 }
+
+export async function criarPontoColeta(dados) {
+  const res = await fetch(`${API_URL}/pontos-coleta`, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify(dados),
+  });
+  return handle(res);
+}
