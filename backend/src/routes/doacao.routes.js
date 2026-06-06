@@ -13,6 +13,8 @@ const criarSchema = {
   cidade: { type: 'string', required: true, minLength: 2 },
   descricao: { type: 'string' },
   fotoUrl: { type: 'string' },
+  // Opcional: id do pedido da Vitrine de demandas que esta doacao atende.
+  demandaId: { type: 'string', required: false },
 }
 
 const editarSchema = {

@@ -1,0 +1,131 @@
+.dem-wrapper {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 16px;
+}
+
+.dem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dem-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.dem-subtitle {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.dem-contador {
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.dem-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dem-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.dem-card-tipo {
+  margin: 0;
+  font-weight: 700;
+  font-size: 16px;
+  color: #111827;
+  text-transform: capitalize;
+}
+
+.dem-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dem-badge-ong {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.dem-badge-pf {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.dem-card-meta {
+  margin: 8px 0 2px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.dem-card-quem {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.dem-card-data {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.dem-btn {
+  margin-top: 14px;
+  width: 100%;
+  background: #2ec4a5;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dem-btn:hover {
+  background: #25a98d;
+}
+
+.dem-empty {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+}
+
+.dem-erro {
+  color: #b91c1c;
+  margin: 0 0 10px;
+  font-weight: 500;
+}

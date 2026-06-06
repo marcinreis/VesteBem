@@ -12,8 +12,12 @@ import RelatorioAdmin from "./pages/RelatorioAdmin";
 import DashboardAdmin from "./pages/DashboardAdmin";
 import DashboardOng from "./pages/DashboardOng";
 import PontosDeColeta from "./pages/PontosDeColeta";
+<<<<<<< HEAD
 import AdicionarPonto from "./pages/AdicionarPonto";
 
+=======
+import Demandas from "./pages/Demandas";
+>>>>>>> 87d2c9f1d5e31d7543d86133815d44fc0ef3a670
 
 
 function App() {
@@ -33,8 +37,12 @@ function App() {
           <Route path="/admin/relatorio" element={<RelatorioAdmin />} />
           <Route path="/ong/dashboard" element={<DashboardOng />} />
           <Route path="/pontos-de-coleta" element={<PontosDeColeta />} />
+<<<<<<< HEAD
           <Route path="/admin/pontos-coleta" element={<AdicionarPonto />} />
           <Route path="ong/pontos-coleta/adicionar" element={<AdicionarPonto />} />
+=======
+          <Route path="/demandas" element={<Demandas />} />
+>>>>>>> 87d2c9f1d5e31d7543d86133815d44fc0ef3a670
         </Route>
       </Routes>
     </BrowserRouter>

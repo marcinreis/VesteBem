@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { criarDoacao } from "../services/doacoesService";
 import "../pages_css/DoarRoupas.css";
 
@@ -7,11 +7,18 @@ const tiposRoupa = ["Camiseta", "Calça", "Jaqueta", "Vestido", "Saia", "Shorts"
 const tamanhos = ["PP", "P", "M", "G", "GG", "XG", "Infantil"];
 const conservacoes = ["Excelente", "Bom", "Regular"];
 
+// Casa um valor livre (vindo de uma demanda) com uma das opções fixas, ignorando caixa.
+const matchOpcao = (opcoes, valor) =>
+  opcoes.find((o) => o.toLowerCase() === String(valor ?? "").toLowerCase()) ?? "";
+
 export default function DoarRoupas() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const demanda = location.state?.demanda ?? null;
 
-  const [tipoPeca, setTipoPeca] = useState("");
-  const [tamanho, setTamanho] = useState("");
+  // Veio da Vitrine de demandas: já inicia tipo/tamanho quando batem com as opções.
+  const [tipoPeca, setTipoPeca] = useState(() => matchOpcao(tiposRoupa, demanda?.tipoPeca));
+  const [tamanho, setTamanho] = useState(() => matchOpcao(tamanhos, demanda?.tamanho));
   const [conservacao, setConservacao] = useState("");
   const [cidade, setCidade] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -35,8 +42,10 @@ export default function DoarRoupas() {
         conservacao,
         cidade: cidade.trim(),
         descricao: descricao.trim() || undefined,
+        // Quando veio da Vitrine de demandas, fecha o pedido atendido.
+        demandaId: demanda?.id,
       });
-      navigate("/dashboard");
+      navigate(demanda ? "/demandas" : "/dashboard");
     } catch (err) {
       setErro(err.message || "Erro ao cadastrar doação.");
     } finally {
@@ -50,6 +59,24 @@ export default function DoarRoupas() {
         <h1 className="doar-title">Cadastrar Doação</h1>
         <p className="doar-subtitle">Preencha as informações sobre a peça que você deseja doar</p>
       </div>
+
+      {demanda && (
+        <div
+          style={{
+            background: "#ecfdf5",
+            border: "1px solid #a7f3d0",
+            color: "#065f46",
+            borderRadius: 10,
+            padding: "10px 14px",
+            margin: "0 0 16px",
+            fontSize: 14,
+          }}
+        >
+          Você está doando para atender um pedido:{" "}
+          <strong>{demanda.tipoPeca}</strong>
+          {demanda.tamanho ? <> · tamanho <strong>{demanda.tamanho}</strong></> : null}
+        </div>
+      )}
 
       <div className="doar-card">
         <div className="doar-card-header">

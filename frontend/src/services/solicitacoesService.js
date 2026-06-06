@@ -42,6 +42,24 @@ export async function listarMinhasSolicitacoes() {
   return handle(res);
 }
 
+// Vitrine de demandas: pedidos livres (sem peça vinculada) ainda pendentes.
+export async function listarDemandas() {
+  const res = await fetch(`${API_URL}/solicitacoes/demandas`, {
+    method: "GET",
+    headers: await authHeaders(),
+  });
+  return handle(res);
+}
+
+// Pedidos recebidos: solicitações feitas sobre as peças que eu doei.
+export async function listarSolicitacoesRecebidas() {
+  const res = await fetch(`${API_URL}/solicitacoes/recebidas`, {
+    method: "GET",
+    headers: await authHeaders(),
+  });
+  return handle(res);
+}
+
 export async function cancelarSolicitacao(id) {
   const res = await fetch(`${API_URL}/solicitacoes/${id}/cancelar`, {
     method: "PATCH",
