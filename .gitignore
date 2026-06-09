@@ -1,0 +1,4 @@
+# Variaveis de ambiente da raiz (lidas pelo docker-compose). Contem segredos.
+.env
+.env.*
+!.env.example
