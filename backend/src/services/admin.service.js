@@ -47,13 +47,36 @@ export async function gerarRelatorio() {
     if (s.status in solPorStatus) solPorStatus[s.status]++
   }
   const porTipo = {}
+  // chaveNormalizada -> { rotulos: { grafiaOriginal: contagem }, total }
   const porCidade = {}
 
   for (const d of doacoes) {
     if (d.status in porStatus) porStatus[d.status]++
     if (d.tipoPeca) porTipo[d.tipoPeca] = (porTipo[d.tipoPeca] || 0) + 1
-    if (d.cidade) porCidade[d.cidade] = (porCidade[d.cidade] || 0) + 1
+    if (d.cidade) {
+      const rotulo = String(d.cidade).trim()
+      if (rotulo) {
+        // Normaliza para juntar variantes: minusculas, sem acento e sem espacos extras.
+        const chave = rotulo
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '')
+        const cidade = porCidade[chave] || (porCidade[chave] = { rotulos: {}, total: 0 })
+        cidade.total++
+        cidade.rotulos[rotulo] = (cidade.rotulos[rotulo] || 0) + 1
+      }
+    }
   }
+
+  // Junta variantes da mesma cidade (ex.: "Fortaleza" e "fortaleza") e
+  // exibe a grafia mais frequente.
+  const topCidades = Object.values(porCidade)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5)
+    .map(({ rotulos, total }) => ({
+      nome: Object.entries(rotulos).sort((a, b) => b[1] - a[1])[0][0],
+      total,
+    }))
 
   const usuariosPorPerfil = Object.fromEntries(PERFIS.map((p) => [p, 0]))
   for (const u of usuarios) {
@@ -99,7 +122,7 @@ export async function gerarRelatorio() {
     },
     usuariosPorPerfil,
     topTipos: topN(porTipo),
-    topCidades: topN(porCidade),
+    topCidades,
     ultimasDoacoes,
     ultimasEntregas,
   }
