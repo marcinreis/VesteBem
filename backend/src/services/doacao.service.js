@@ -17,11 +17,33 @@ const SOLICITACAO_ATENDIDA = 'Atendida'
 
 const CAMPOS_EDITAVEIS = ['tipoPeca', 'tamanho', 'conservacao', 'descricao', 'fotoUrl', 'cidade']
 
+// Conectores que ficam em minuscula no meio do nome (ex.: "Rio de Janeiro").
+const CONECTORES_CIDADE = new Set(['de', 'do', 'da', 'dos', 'das', 'e'])
+
+// Limpa e padroniza a cidade ao salvar: remove espacos extras e aplica
+// capitalizacao (ex.: " fortaleza " -> "Fortaleza"). Nao valida se a cidade
+// existe; apenas deixa os dados consistentes na origem.
+function normalizarCidade(valor) {
+  if (valor == null) return null
+  const limpo = String(valor).trim().replace(/\s+/g, ' ')
+  if (!limpo) return null
+  return limpo
+    .toLowerCase()
+    .split(' ')
+    .map((palavra, i) =>
+      i > 0 && CONECTORES_CIDADE.has(palavra)
+        ? palavra
+        : palavra.charAt(0).toUpperCase() + palavra.slice(1),
+    )
+    .join(' ')
+}
+
 function pickEditaveis(dados) {
   const out = {}
   for (const campo of CAMPOS_EDITAVEIS) {
     if (dados[campo] !== undefined) out[campo] = dados[campo]
   }
+  if (out.cidade !== undefined) out.cidade = normalizarCidade(out.cidade)
   return out
 }
 
@@ -46,7 +68,7 @@ export async function criar(usuarioId, dados) {
     conservacao: dados.conservacao,
     descricao: dados.descricao ?? null,
     fotoUrl: dados.fotoUrl ?? null,
-    cidade: dados.cidade ?? null,
+    cidade: normalizarCidade(dados.cidade),
     status: STATUS.DISPONIVEL,
     criadoEm: admin.firestore.FieldValue.serverTimestamp(),
     atualizadoEm: admin.firestore.FieldValue.serverTimestamp(),
