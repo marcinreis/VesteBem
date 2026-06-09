@@ -1,0 +1,16 @@
+# Dependencias e build sao gerados dentro da imagem
+node_modules
+dist
+dist-ssr
+
+# Segredos / ambiente (as VITE_* entram via build args, nao por arquivo)
+.env
+.env.*
+*.local
+
+# Artefatos que nao pertencem a imagem
+.git
+.gitignore
+Dockerfile
+.dockerignore
+*.log
